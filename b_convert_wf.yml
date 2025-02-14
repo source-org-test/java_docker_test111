@@ -1,0 +1,69 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  BASE_IMAGE: your_base_image_name
+  BASE_TAG: your_base_tag
+  QUAY: your_quay_registry
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up PowerShell
+      uses: actions/setup-pwsh@v2
+
+    - name: Validate Environment Variables
+      run: |
+        if (-not $env:BASE_IMAGE) { throw "BASE_IMAGE is not set" }
+        if (-not $env:BASE_TAG) { throw "BASE_TAG is not set" }
+        if (-not $env:QUAY) { throw "QUAY is not set" }
+
+    - name: Clean and Prepare Build Directories
+      shell: pwsh
+      run: |
+        Remove-Item -Path ./build -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -Path "./build/nupkg" -ItemType "directory" -Force
+        New-Item -Path "./build/bin" -ItemType "directory" -Force
+
+    - name: Gather and Process Manifests
+      shell: pwsh
+      run: |
+        $files = Get-ChildItem -Path ".\$env:BASE_IMAGE" -Recurse -File -Include *manifest.json*
+        $packages = @{}
+        
+        foreach ($file in $files) {
+          $content = Get-Content $file.FullName -Raw | ConvertFrom-Json
+          foreach ($key in $content.PSObject.Properties.Name) {
+            if (-not $packages.ContainsKey($key) -or $packages[$key].version -lt $content[$key].version) {
+              $packages[$key] = $content[$key]
+            }
+          }
+        }
+
+    - name: Convert Packages to JSON
+      shell: pwsh
+      run: |
+        $packages | ConvertTo-Json -Depth 3 | Out-File './manifest.json' -NoNewline -Force
+
+    - name: Build and Push Docker Image
+      run: |
+        docker build --pull . -f ./$env:BASE_IMAGE/Dockerfile -t $env:QUAY/$env:BASE_IMAGE-base:ext-$env:BASE_TAG --no-cache \
+          --build-arg QUAY=$env:QUAY --build-arg BASE_IMAGE=$env:BASE_IMAGE-base --build-arg BASE_TAG=$env:BASE_TAG
+
+        echo ${{ secrets.DEPLOYER_CRED }} | docker login -u ${{ secrets.DEPLOYER_ID }} --password-stdin registry.cigna.com
+        docker push $env:QUAY/$env:BASE_IMAGE-base:ext-$env:BASE_TAG
+        docker tag $env:QUAY/$env:BASE_IMAGE-base:ext-$env:BASE_TAG $env:QUAY/$env:BASE_IMAGE-base:latest
+        docker push $env:QUAY/$env:BASE_IMAGE-base:latest
+
+    - name: Clean Up Build Directory
+      shell: pwsh
+      run: Remove-Item -Path ./build -Recurse -Force
