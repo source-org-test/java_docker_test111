@@ -1,0 +1,90 @@
+name: Cigna NuGet Processing and Docker Build
+
+on:
+  push:
+    branches: [ main ]
+  
+env:
+  BASE_IMAGE: ${{ github.event.pull_request.title }}
+  BASE_TAG: 'latest'
+  deployerId: ${{ secrets.DEPLOYER_ID }}
+  deployerCred: ${{ secrets.DEPLOYER_CRED }}
+  VERSION: ${{ steps.version.output }}
+
+jobs:
+  process-manifests:
+    name: Process Manifest Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Initialize
+        uses: actions/checkout@v2
+        
+      - name: Clean Up Build Directories
+        run: |
+          rm -rf .\build\bin
+          rm -rf .\build\nupkg
+          mkdir -p .\build\bin
+          mkdir -p .\build\nupkg
+          
+      - name: List Files
+        run: |
+          ls -la .\${BASE_IMAGE}\*.manifest.json | grep .\*.json
+          
+      - name: Convert Manifests to HashTables
+        run: |
+          $content = @()
+          foreach ($file in $(ls -la .\${BASE_IMAGE}\*.manifest.json)) {
+              $content += (Get-Content -Raw $file | ConvertFrom-Json | ConvertTo-Hashtable)
+          }
+          
+      - name: Create Package Dictionary
+        run: |
+          $packages = @{ }
+          foreach ($item in $content) {
+            $keys = $item.Keys -as [string[]]
+            For ($n = 0; $n -lt $keys.Count; $n++) {
+              $key = $keys[$n]
+              $value = $item.$($keys[$n])
+              
+              if (!$packages.ContainsKey($key)) {
+                $packages[$key] = $value
+              } else {
+                if ($packages[$key].Version -lt $value.Version) {
+                  $packages[$key] = $value
+                }
+              }
+            }
+          }
+          
+      - name: Output Version
+        run: |
+          Write-Host "Version: $VERSION"
+          
+      - name: Create & Publish Docker Image
+        run: docker build --pull . -f .\${BASE_IMAGE}\Dockerfile -t ${QUAY}/${BASE_IMAGE}-base:ext-${BASE_TAG}-${VERSION} --no-cache --build-arg QUAY=${QUAY} --build-arg BASE_IMAGE=${BASE_IMAGE}-base --build-arg BASE_TAG=${BASE_TAG}
+        run: docker login -u ${{ secrets.DEPLOYER_ID }} -p ${{ secrets.DEPLOYER_CRED }} registry.cigna.com
+        run: docker push ${QUAY}/${BASE_IMAGE}-base:ext-${BASE_TAG}-${VERSION}
+        run: docker tag ${QUAY}/${BASE_IMAGE}-base:ext-${BASE_TAG}-${VERSION} ${QUAY}/${BASE_IMAGE}-base:latest
+        run: docker push ${QUAY}/${BASE_IMAGE}-base:latest
+        
+      - name: Clean Up Build Directories
+        run: rm -rf .\build\bin
+        run: rm -rf .\build\nupkg
+        
+  version:
+    name: Determine Version
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract Version from Packages
+        run: |
+          $version = '1.0.0'
+          foreach ($package in $content) {
+            if (contains $package.Keys "PACKAGE") {
+              $version = $packages[$keys[0]].Version
+            }
+          }
+          
+          set-output name="VERSION" "$version"
