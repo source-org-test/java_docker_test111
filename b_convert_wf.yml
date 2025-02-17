@@ -48,11 +48,41 @@ jobs:
             }
           }
         }
+        $packages | ConvertTo-Json -Depth 3 | Out-File './manifest.json' -NoNewline -Force
 
-    - name: Convert Packages to JSON
+    - name: Download and Extract Packages
       shell: pwsh
       run: |
-        $packages | ConvertTo-Json -Depth 3 | Out-File './manifest.json' -NoNewline -Force
+        $packages = Get-Content './manifest.json' | ConvertFrom-Json
+        foreach ($package in $packages.PSObject.Properties) {
+          $name = $package.Value.name
+          $version = $package.Value.version
+          $build = $package.Value.build
+          $url = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$($name)/"
+          
+          Write-Output "Fetching package $name version $version build $build..."
+          $links = (Invoke-WebRequest $url).Links | Where-Object { $_.href -like "*$version.$build-*" }
+
+          if ($links.Count -eq 0) {
+            Write-Output "No package found for $name with version $version and build $build."
+            continue
+          }
+
+          foreach ($link in $links) {
+            $downloadUrl = "$url$($link.href)"
+            $outputPath = "./build/nupkg/temp.zip"
+            Invoke-WebRequest -Uri $downloadUrl -OutFile $outputPath
+
+            New-Item -ItemType "directory" -Path "./build/nupkg/$name" -Force
+            New-Item -ItemType "directory" -Path "./build/bin/$name" -Force
+            Expand-Archive -Path $outputPath -DestinationPath "./build/nupkg/$name" -Force
+
+            # Move relevant files to the bin directory
+            Get-ChildItem -Path "./build/nupkg/$name" -Filter *.dll -Recurse | Move-Item -Destination "./build/bin/$name" -Force
+            Get-ChildItem -Path "./build/nupkg/$name" -Filter *.deps.json -Recurse | Move-Item -Destination "./build/bin/$name" -Force
+            Get-ChildItem -Path "./build/nupkg/$name" -Filter *.pdb -Recurse | Move-Item -Destination "./build/bin/$name" -Force
+          }
+        }
 
     - name: Build and Push Docker Image
       run: |
