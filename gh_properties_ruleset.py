@@ -4,13 +4,14 @@ import os
 import logging
 import datetime
 import argparse
+import warnings
+import urllib3
 
 # GitHub API base URL
 API_URL = "https://api.github.com"
 
 # Repository input file delimiter 
 INPUT_FILE_DELIMITER = "::"  
-SETTINGS_DELIMITER = ","
 
 # GitHub token and organization/repo details
 GITHUB_TOKEN = None
@@ -57,15 +58,40 @@ def log_and_print(message, log_level='info'):
         print(f"{log_datetime}: {message}") # Print the message to the console with the formatted datetime
 
 
-def process_repo_settings(full_repo_path, settings_str):
+def extract_org_and_repo(repo_str: str):
     try:
-        # Extract org name and repo name from full path
-        if '/' in full_repo_path:
-            org_name, repo_name = full_repo_path.split('/')
+        if '/' in repo_str:
+            # Split the string into org and repo name
+            org_name, repo_name = repo_str.split('/')
+            return org_name, repo_name
         else:
             # If no organization specified, use the default org
-            org_name = "source-org-test"  # You can make this configurable if needed
-            repo_name = full_repo_path
+            return ORG_NAME, repo_str
+    except Exception as e:
+        raise ValueError(f"Invalid repository format '{repo_str}'. Expected format: 'org/repo' or 'repo'. Error: {str(e)}")
+
+
+def get_repository_branches(org_name, repo_name):
+    """Get list of branches for a repository"""
+    try:
+        branches_url = f"{API_URL}/repos/{org_name}/{repo_name}/branches"
+        response = requests.get(
+            branches_url,
+            headers=headers,
+            verify=CERT_PATH if CERT_PATH else False
+        )
+        if response.status_code == 200:
+            return [branch['name'] for branch in response.json()]
+        return []
+    except Exception as e:
+        log_and_print(f"[ERROR] Failed to get branches: {str(e)}", "error")
+        return []
+
+
+def process_repo_settings(full_repo_path, settings_str):
+    try:
+        # Extract org name and repo name using the new function
+        org_name, repo_name = extract_org_and_repo(full_repo_path)
         
         # Parse settings string
         settings_dict = {}
@@ -73,9 +99,36 @@ def process_repo_settings(full_repo_path, settings_str):
             for setting in settings_str.split(','):
                 if '=' in setting:
                     key, value = setting.split('=')
-                    # Convert string 'true'/'false' to boolean for certain settings
-                    if key == 'delete_branch_on_merge':
+                    key = key.strip()
+                    value = value.strip()
+                    
+                    # List of boolean settings
+                    boolean_settings = [
+                        'delete_branch_on_merge', 'has_wiki', 'has_issues', 
+                        'has_projects', 'allow_squash_merge', 'allow_merge_commit',
+                        'allow_rebase_merge', 'allow_auto_merge', 'private',
+                        'is_template', 'archived', 'allow_forking',
+                        'web_commit_signoff_required'
+                    ]
+                    # Convert string 'true'/'false' to boolean for boolean settings
+                    if key in boolean_settings:
+                        if value.lower() not in ['true', 'false']:
+                            log_and_print(f"VALIDATION ERROR: Invalid boolean value '{value}' for setting '{key}' in repository '{full_repo_path}'", "error")
+                            log_and_print(f"Boolean settings must be exactly 'true' or 'false'. Skipping this setting.", "error")
+                            continue
                         settings_dict[key] = value.lower() == 'true'
+                    # If trying to set default branch, validate it exists first
+                    elif key == 'default_branch':
+                        branches = get_repository_branches(org_name, repo_name)
+                        if value not in branches:
+                            log_and_print(f"[WARNING] Branch '{value}' does not exist in repository. Available branches: {', '.join(branches)}", "error")
+                            continue
+                        settings_dict[key] = value
+                    # Handle other string settings
+                    elif key in ['name', 'description', 'homepage', 'visibility']:
+                        settings_dict[key] = value
+                    else:
+                        log_and_print(f"[WARNING] Unknown setting '{key}'. Skipping.", "warning")
         
         # URL to update repository settings
         repo_settings_url = f"{API_URL}/repos/{org_name}/{repo_name}"
@@ -93,25 +146,20 @@ def process_repo_settings(full_repo_path, settings_str):
             
             # Check if the request was successful
             if response.status_code == 200:
-                log_and_print(f"✓ Successfully updated repository settings for '{full_repo_path}'","success")
+                log_and_print(f"[SUCCESS] Updated repository settings for '{full_repo_path}'","success")
                 for key, value in settings_dict.items():
                     log_and_print(f"  - {key}: {value}","success")
             else:
-                log_and_print(f"✗ Failed to update repository settings - status code: {response.status_code}","error")
+                log_and_print(f"[ERROR] Failed to update repository settings - status code: {response.status_code}","error")
                 log_and_print(response.json(),"error")
     except Exception as e:
-        log_and_print(f"Error processing repository settings for '{full_repo_path}': {str(e)}", "error")
+        log_and_print(f"[ERROR] Error processing repository settings for '{full_repo_path}': {str(e)}", "error")
 
 
 def custom_setting_update(full_repo_path, custom_properties):
     try:
-        # Extract org name and repo name from full path
-        if '/' in full_repo_path:
-            org_name, repo_name = full_repo_path.split('/')
-        else:
-            # If no organization specified, use the default org
-            org_name = "source-org-test"  # You can make this configurable if needed
-            repo_name = full_repo_path
+        # Extract org name and repo name using the new function
+        org_name, repo_name = extract_org_and_repo(full_repo_path)
         
         # URL to update repository settings
         custom_property_url = f"{API_URL}/repos/{org_name}/{repo_name}/properties/values"
@@ -126,12 +174,12 @@ def custom_setting_update(full_repo_path, custom_properties):
         
         # Check if the request was successful
         if response.status_code == 204:
-            log_and_print(f"...Successfully set custom property [] for repository '{full_repo_path}'...","success")
+            log_and_print(f"[SUCCESS] Set custom property for repository '{full_repo_path}'","success")
         else:
-            log_and_print(f"...Failed to set custom property - status code: {response.status_code}","error")
+            log_and_print(f"[ERROR] Failed to set custom property - status code: {response.status_code}","error")
             log_and_print(response.json(),"error")
     except Exception as e:
-        log_and_print(f"Error updating custom properties for '{full_repo_path}': {str(e)}", "error")
+        log_and_print(f"[ERROR] Error updating custom properties for '{full_repo_path}': {str(e)}", "error")
 
 
 def main():
@@ -154,6 +202,10 @@ def main():
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
     }
+    
+    # If no certificate is provided, raise an error
+    if not CERT_PATH:
+        raise ValueError("Source certificate path not provided")
     
     # Get the current date and time, and format it
     current_datetime = datetime.datetime.now().strftime('%d%b%Y_%H%M')
