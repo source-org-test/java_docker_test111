@@ -1,0 +1,113 @@
+# GitHub Repository Manager
+
+A utility for automating GitHub repository configuration and custom properties management at scale. This tool allows you to efficiently manage multiple GitHub repositories by configuring their settings and custom properties through a simple input file.
+
+## Features
+
+- Set custom properties for multiple repositories
+- Configure repository settings including:
+  - Security features (Advanced Security, Secret Scanning)
+  - Repository features (Issues, Wiki, Projects)
+  - Pull Request settings (merge types, branch deletion)
+  - Basic repository properties (visibility, description)
+- Batch processing of multiple repositories
+- Flexible input file format
+- Detailed logging with timestamps
+
+## Prerequisites
+
+- Python 3.x
+- GitHub Personal Access Token with appropriate permissions
+- Required Python packages:
+  - requests
+
+## Installation
+
+1. Clone or download this repository
+2. Set up your GitHub token as an environment variable:
+   ```bash
+   set GITHUB_TOKEN=your_token_here
+   ```
+
+## Usage
+
+1. Create an input file (e.g., `input_repos.txt`) with your repository configurations:
+   ```
+   repository-name::custom-properties::repository-settings
+   ```
+
+   Example:
+   ```
+   org-name/repo-name::customer-property=value::delete_branch_on_merge=true
+   ```
+
+2. Run the script:
+   ```bash
+   python gh_properties_ruleset.py -r input_repos.txt [-c certificate_path] [-t TOKEN_ENV_VAR]
+   ```
+
+### Input File Format
+
+The input file uses double colons (`::`) as delimiters with three sections:
+1. Repository name (with optional organization)
+2. Custom properties (key=value pairs separated by commas)
+3. Repository settings (key=value pairs separated by commas)
+
+Example:
+```
+org/repo::prop1=value1,prop2=value2::has_wiki=false,delete_branch_on_merge=true
+```
+
+### Supported Repository Settings
+
+#### Security and Analysis
+- `advanced_security`: Enable/disable GitHub Advanced Security
+- `secret_scanning`: Enable/disable secret scanning
+- `secret_scanning_push_protection`: Enable/disable protection against pushing secrets
+- `secret_scanning_ai_detection`: Enable/disable AI-based secret detection
+- `secret_scanning_non_provider_patterns`: Enable/disable non-provider secret patterns
+
+#### Repository Features
+- `has_issues`: Enable/disable issues
+- `has_projects`: Enable/disable projects
+- `has_wiki`: Enable/disable wiki
+- `is_template`: Make repository available as a template
+- `default_branch`: Set the default branch
+- `archived`: Archive/unarchive the repository
+- `allow_forking`: Allow/prevent private forks
+- `web_commit_signoff_required`: Require contributors to sign off on web-based commits
+
+#### Pull Request Settings
+- `allow_squash_merge`: Allow/prevent squash-merging PRs
+- `allow_merge_commit`: Allow/prevent merge commits
+- `allow_rebase_merge`: Allow/prevent rebase-merging
+- `allow_auto_merge`: Allow/prevent auto-merge on PRs
+- `delete_branch_on_merge`: Auto-delete head branches after PR merge
+- `allow_update_branch`: Allow updating PR branches behind base branch
+- `squash_merge_commit_title`: Set default squash merge commit title format
+- `squash_merge_commit_message`: Set default squash merge commit message format
+- `merge_commit_title`: Set default merge commit title format
+- `merge_commit_message`: Set default merge commit message format
+
+#### Basic Properties
+- `name`: Repository name
+- `description`: Repository description
+- `homepage`: Repository homepage URL
+- `private`: Make repository private/public
+- `visibility`: Set repository visibility (public/private)
+
+## Error Handling
+
+The script includes comprehensive error handling and logging:
+- Invalid input file format
+- GitHub API errors
+- Authentication issues
+- Network connectivity problems
+
+## Contributing
+
+Feel free to submit issues, fork the repository, and create pull requests for any improvements.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
