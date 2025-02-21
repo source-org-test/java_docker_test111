@@ -1,113 +1,132 @@
-# GitHub Repository Manager
+# GitHub Repository Properties Manager
 
-A utility for automating GitHub repository configuration and custom properties management at scale. This tool allows you to efficiently manage multiple GitHub repositories by configuring their settings and custom properties through a simple input file.
+A Python utility to manage GitHub repository settings and custom properties across multiple repositories.
 
 ## Features
 
-- Set custom properties for multiple repositories
-- Configure repository settings including:
-  - Security features (Advanced Security, Secret Scanning)
-  - Repository features (Issues, Wiki, Projects)
-  - Pull Request settings (merge types, branch deletion)
-  - Basic repository properties (visibility, description)
-- Batch processing of multiple repositories
-- Flexible input file format
+- Update repository settings via GitHub API
+- Manage custom properties for repositories
+- Support for multiple repositories in a single run
+- Robust validation and error handling
 - Detailed logging with timestamps
 
-## Prerequisites
+## Supported Repository Settings
 
-- Python 3.x
-- GitHub Personal Access Token with appropriate permissions
-- Required Python packages:
-  - requests
+The following repository settings can be configured:
 
-## Installation
+### Boolean Settings (must be exactly 'true' or 'false')
+- `delete_branch_on_merge`
+- `has_wiki`
+- `has_issues`
+- `has_projects`
+- `allow_squash_merge`
+- `allow_merge_commit`
+- `allow_rebase_merge`
+- `allow_auto_merge`
+- `private`
+- `is_template`
+- `archived`
+- `allow_forking`
+- `web_commit_signoff_required`
 
-1. Clone or download this repository
-2. Set up your GitHub token as an environment variable:
-   ```bash
-   set GITHUB_TOKEN=your_token_here
+### String Settings
+- `default_branch` (must be an existing branch)
+- `name`
+- `description`
+- `homepage`
+- `visibility`
+
+## Input File Format
+
+The input file uses `::` as a delimiter with the following format:
+```
+repository::custom-properties::repository-settings
+```
+
+Example:
+```
+source-org-test/java_repo_1::test-customer-property-1=true,test-customer-property-2=checking::delete_branch_on_merge=true,default_branch=main
+java_docker_test111::test-customer-property-1=false,test-customer-property-2=nothing::delete_branch_on_merge=false
+```
+
+### Format Rules
+1. Repository name can be either:
+   - Full name with organization: `org-name/repo-name`
+   - Just repository name: `repo-name` (uses default organization)
+2. Custom properties are key-value pairs separated by commas
+3. Repository settings are key-value pairs separated by commas
+4. Boolean settings must be exactly 'true' or 'false'
+5. When setting default_branch, the branch must exist in the repository
+
+## Validation
+
+The script performs several validations:
+
+1. **Boolean Values**: Must be exactly 'true' or 'false'
+   ```
+   # Valid
+   delete_branch_on_merge=true
+   delete_branch_on_merge=false
+   
+   # Invalid (will be skipped with error)
+   delete_branch_on_merge=tru
+   delete_branch_on_merge=yes
+   ```
+
+2. **Branch Names**: When setting default_branch, validates that the branch exists
+   ```
+   # Will only succeed if 'main' exists
+   default_branch=main
+   ```
+
+3. **Repository Names**: Validates format and existence
+   ```
+   # Valid formats
+   org-name/repo-name
+   repo-name
    ```
 
 ## Usage
 
-1. Create an input file (e.g., `input_repos.txt`) with your repository configurations:
-   ```
-   repository-name::custom-properties::repository-settings
-   ```
-
-   Example:
-   ```
-   org-name/repo-name::customer-property=value::delete_branch_on_merge=true
-   ```
-
-2. Run the script:
-   ```bash
-   python gh_properties_ruleset.py -r input_repos.txt [-c certificate_path] [-t TOKEN_ENV_VAR]
-   ```
-
-### Input File Format
-
-The input file uses double colons (`::`) as delimiters with three sections:
-1. Repository name (with optional organization)
-2. Custom properties (key=value pairs separated by commas)
-3. Repository settings (key=value pairs separated by commas)
-
-Example:
-```
-org/repo::prop1=value1,prop2=value2::has_wiki=false,delete_branch_on_merge=true
+```bash
+python gh_properties_ruleset.py -r input_repos.txt -c certificate_path [-t TOKEN_ENV_VAR]
 ```
 
-### Supported Repository Settings
-
-#### Security and Analysis
-- `advanced_security`: Enable/disable GitHub Advanced Security
-- `secret_scanning`: Enable/disable secret scanning
-- `secret_scanning_push_protection`: Enable/disable protection against pushing secrets
-- `secret_scanning_ai_detection`: Enable/disable AI-based secret detection
-- `secret_scanning_non_provider_patterns`: Enable/disable non-provider secret patterns
-
-#### Repository Features
-- `has_issues`: Enable/disable issues
-- `has_projects`: Enable/disable projects
-- `has_wiki`: Enable/disable wiki
-- `is_template`: Make repository available as a template
-- `default_branch`: Set the default branch
-- `archived`: Archive/unarchive the repository
-- `allow_forking`: Allow/prevent private forks
-- `web_commit_signoff_required`: Require contributors to sign off on web-based commits
-
-#### Pull Request Settings
-- `allow_squash_merge`: Allow/prevent squash-merging PRs
-- `allow_merge_commit`: Allow/prevent merge commits
-- `allow_rebase_merge`: Allow/prevent rebase-merging
-- `allow_auto_merge`: Allow/prevent auto-merge on PRs
-- `delete_branch_on_merge`: Auto-delete head branches after PR merge
-- `allow_update_branch`: Allow updating PR branches behind base branch
-- `squash_merge_commit_title`: Set default squash merge commit title format
-- `squash_merge_commit_message`: Set default squash merge commit message format
-- `merge_commit_title`: Set default merge commit title format
-- `merge_commit_message`: Set default merge commit message format
-
-#### Basic Properties
-- `name`: Repository name
-- `description`: Repository description
-- `homepage`: Repository homepage URL
-- `private`: Make repository private/public
-- `visibility`: Set repository visibility (public/private)
+### Arguments
+- `-r, --repos-file`: Path to input file containing repository configurations
+- `-c, --cert`: Path to SSL certificate file
+- `-t, --token-env`: Environment variable name containing GitHub token (default: GITHUB_TOKEN)
 
 ## Error Handling
 
-The script includes comprehensive error handling and logging:
-- Invalid input file format
-- GitHub API errors
-- Authentication issues
-- Network connectivity problems
+The script handles various error cases:
+1. Invalid boolean values in settings
+2. Non-existent branches for default_branch
+3. Invalid repository names
+4. Network and API errors
+5. Permission issues
 
-## Contributing
+All errors are:
+- Logged with timestamps
+- Written to a log file in the output directory
+- Displayed in the console
+- Non-fatal (script continues processing other repositories)
 
-Feel free to submit issues, fork the repository, and create pull requests for any improvements.
+## Log Files
 
-## License
+Log files are created in the `output` directory with the format:
+```
+LOG_input-file-name_DDMMMYYYY_HHMMSS.log
+```
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Each log entry includes:
+- Timestamp
+- Log level (ERROR, WARNING, SUCCESS, INFO)
+- Detailed message
+
+## Requirements
+
+- Python 3.x
+- `requests` library
+- GitHub Personal Access Token with appropriate permissions
+- Optional: SSL certificate for enterprise GitHub instances
