@@ -4,97 +4,219 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '${{ env.BASE_IMAGE }}/**'
+      - '.github/workflows/ci-docker.yml'
   workflow_dispatch:
+    inputs:
+      base_image:
+        description: 'Base image name'
+        required: false
+      base_tag:
+        description: 'Base tag'
+        required: false
+      quay_registry:
+        description: 'Quay registry'
+        required: false
 
 env:
-  BASE_IMAGE: your_base_image_name
-  BASE_TAG: your_base_tag
-  QUAY: your_quay_registry
+  BASE_IMAGE: ${{ github.event.inputs.base_image || 'your_base_image_name' }}
+  BASE_TAG: ${{ github.event.inputs.base_tag || 'your_base_tag' }}
+  QUAY: ${{ github.event.inputs.quay_registry || 'your_quay_registry' }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      packages: write
+    
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
-
+      uses: actions/checkout@v4
+    
     - name: Set up PowerShell
       uses: actions/setup-pwsh@v2
-
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
     - name: Validate Environment Variables
       shell: pwsh
       run: |
-        if (-not $env:BASE_IMAGE) { throw "ERROR: BASE_IMAGE is not set." }
-        if (-not $env:BASE_TAG) { throw "ERROR: BASE_TAG is not set." }
-        if (-not $env:QUAY) { throw "ERROR: QUAY is not set." }
-
-    - name: Clean and Prepare Build Directories
+        $requiredVars = @('BASE_IMAGE', 'BASE_TAG', 'QUAY')
+        $missingVars = $requiredVars.Where({ -not $env:$_ })
+        
+        if ($missingVars) {
+          throw "ERROR: Required environment variables not set: $($missingVars -join ', ')"
+        }
+    
+    - name: Prepare Build Directories
       shell: pwsh
       run: |
-        Remove-Item -Path ./build -Recurse -Force -ErrorAction SilentlyContinue
-        New-Item -Path "./build/nupkg" -ItemType "directory" -Force
-        New-Item -Path "./build/bin" -ItemType "directory" -Force
-
+        $paths = @(
+          "./build/nupkg",
+          "./build/bin"
+        )
+        
+        foreach ($path in $paths) {
+          if (Test-Path $path) {
+            Remove-Item -Path $path -Recurse -Force
+          }
+          New-Item -Path $path -ItemType Directory -Force | Out-Null
+        }
+    
     - name: Gather and Process Manifests
       shell: pwsh
       run: |
-        $files = Get-ChildItem -Path ".\$env:BASE_IMAGE" -Recurse -File -Include *manifest.json*
-        $packages = @{}
-
-        foreach ($file in $files) {
-          $content = Get-Content $file.FullName -Raw | ConvertFrom-Json
-          foreach ($key in $content.PSObject.Properties.Name) {
-            if (-not $packages.ContainsKey($key) -or $packages[$key].version -lt $content[$key].version) {
-              $packages[$key] = $content[$key]
+        try {
+          $manifestPath = ".\$env:BASE_IMAGE"
+          if (-not (Test-Path $manifestPath)) {
+            throw "Manifest directory not found: $manifestPath"
+          }
+          
+          $files = Get-ChildItem -Path $manifestPath -Recurse -File -Include *manifest.json* -ErrorAction Stop
+          if (-not $files) {
+            throw "No manifest files found in $manifestPath"
+          }
+          
+          $packages = @{}
+          foreach ($file in $files) {
+            $content = Get-Content $file.FullName -Raw | ConvertFrom-Json
+            foreach ($key in $content.PSObject.Properties.Name) {
+              if (-not $packages.ContainsKey($key) -or 
+                  [version]$packages[$key].version -lt [version]$content[$key].version) {
+                $packages[$key] = $content[$key]
+              }
+            }
+          }
+          
+          $packages | ConvertTo-Json -Depth 3 | Set-Content './manifest.json' -NoNewline
+        }
+        catch {
+          Write-Error "Failed to process manifests: $_"
+          exit 1
+        }
+    
+    - name: Download and Extract NuGet Packages
+      shell: pwsh
+      env:
+        ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
+      run: |
+        try {
+          # Create headers for Artifactory token authentication
+          $headers = @{
+            'X-JFrog-Art-Api' = $env:ARTIFACTORY_TOKEN
+          }
+          
+          Write-Output " Authenticating with Artifactory..."
+          
+          $packages = Get-Content './manifest.json' | ConvertFrom-Json
+          foreach ($package in $packages.PSObject.Properties) {
+            $name = $package.Value.name
+            $version = $package.Value.version
+            $build = $package.Value.build
+            $url = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$name/"
+            
+            Write-Output " Processing package: $name v$version.$build"
+            
+            try {
+              $response = Invoke-WebRequest -Uri $url -Headers $headers -ErrorAction Stop
+              $packagePattern = "*$version.$build-*"
+              $links = $response.Links | Where-Object { $_.href -like $packagePattern }
+              
+              if (-not $links) {
+                Write-Warning " No matching package found: $name v$version.$build"
+                continue
+              }
+              
+              $downloadUrl = "$url$($links[0].href)"
+              $outputPath = "./build/nupkg/temp_$name.zip"
+              
+              Write-Output " Downloading: $downloadUrl"
+              Invoke-WebRequest -Uri $downloadUrl -Headers $headers -OutFile $outputPath
+              
+              if (-not (Test-Path $outputPath)) {
+                throw "Download failed - output file not created"
+              }
+              
+              $paths = @(
+                "./build/nupkg/$name",
+                "./build/bin/$name"
+              )
+              foreach ($path in $paths) {
+                New-Item -ItemType Directory -Path $path -Force | Out-Null
+              }
+              
+              Write-Output " Extracting package..."
+              Expand-Archive -Path $outputPath -DestinationPath "./build/nupkg/$name" -Force
+              
+              # Move required files
+              $fileTypes = @('*.dll', '*.deps.json', '*.pdb')
+              $movedFiles = 0
+              foreach ($type in $fileTypes) {
+                $files = Get-ChildItem -Path "./build/nupkg/$name" -Filter $type -Recurse
+                if ($files) {
+                  $files | Move-Item -Destination "./build/bin/$name" -Force
+                  $movedFiles += $files.Count
+                }
+              }
+              
+              if ($movedFiles -eq 0) {
+                throw "No files were found to move"
+              }
+              
+              Remove-Item -Path $outputPath -Force
+              Write-Output " Successfully processed: $name"
+            }
+            catch {
+              if ($_.Exception.Response.StatusCode -eq 403) {
+                Write-Error " Authentication failed for $name. Please check Artifactory token."
+                Write-Error "Make sure your token has read permissions for the repository."
+                exit 1
+              }
+              Write-Error " Failed processing $name : $_"
+              if ($_.Exception.Response) {
+                Write-Error "Response Status Code: $($_.Exception.Response.StatusCode.value__)"
+                Write-Error "Response Status Description: $($_.Exception.Response.StatusDescription)"
+              }
+              exit 1
             }
           }
         }
-        $packages | ConvertTo-Json -Depth 3 | Out-File './manifest.json' -NoNewline -Force
-
-    - name: Download and Extract NuGet Packages
-      shell: pwsh
-      run: |
-        $packages = Get-Content './manifest.json' | ConvertFrom-Json
-        foreach ($package in $packages.PSObject.Properties) {
-          $name = $package.Value.name
-          $version = $package.Value.version
-          $build = $package.Value.build
-          $url = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$($name)/"
-
-          Write-Output "Fetching package $name version $version build $build..."
-          $links = (Invoke-WebRequest $url).Links | Where-Object { $_.href -like "*$version.$build-*" }
-
-          if ($links.Count -eq 0) {
-            Write-Output "⚠️ No package found for $name with version $version and build $build."
-            continue
-          }
-
-          foreach ($link in $links) {
-            $downloadUrl = "$url$($link.href)"
-            $outputPath = "./build/nupkg/temp.zip"
-            Invoke-WebRequest -Uri $downloadUrl -OutFile $outputPath
-
-            New-Item -ItemType "directory" -Path "./build/nupkg/$name" -Force
-            New-Item -ItemType "directory" -Path "./build/bin/$name" -Force
-            Expand-Archive -Path $outputPath -DestinationPath "./build/nupkg/$name" -Force
-
-            # Move relevant files to bin directory
-            Get-ChildItem -Path "./build/nupkg/$name" -Filter *.dll -Recurse | Move-Item -Destination "./build/bin/$name" -Force
-            Get-ChildItem -Path "./build/nupkg/$name" -Filter *.deps.json -Recurse | Move-Item -Destination "./build/bin/$name" -Force
-            Get-ChildItem -Path "./build/nupkg/$name" -Filter *.pdb -Recurse | Move-Item -Destination "./build/bin/$name" -Force
-          }
+        catch {
+          Write-Error "Failed to process packages: $_"
+          exit 1
         }
-
+    
+    - name: Login to Quay Registry
+      uses: docker/login-action@v3
+      with:
+        registry: registry.cigna.com
+        username: ${{ secrets.DEPLOYER_ID }}
+        password: ${{ secrets.DEPLOYER_CRED }}
+    
     - name: Build and Push Docker Image
-      run: |
-        docker build --pull . -f ./$env:BASE_IMAGE/Dockerfile -t $env:QUAY/$env:BASE_IMAGE-base:ext-$env:BASE_TAG --no-cache \
-          --build-arg QUAY=$env:QUAY --build-arg BASE_IMAGE=$env:BASE_IMAGE-base --build-arg BASE_TAG=$env:BASE_TAG
-
-        echo ${{ secrets.DEPLOYER_CRED }} | docker login -u ${{ secrets.DEPLOYER_ID }} --password-stdin registry.cigna.com
-        docker push $env:QUAY/$env:BASE_IMAGE-base:ext-$env:BASE_TAG
-        docker tag $env:QUAY/$env:BASE_IMAGE-base:ext-$env:BASE_TAG $env:QUAY/$env:BASE_IMAGE-base:latest
-        docker push $env:QUAY/$env:BASE_IMAGE-base:latest
-
-    - name: Clean Up Build Directory
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./${{ env.BASE_IMAGE }}/Dockerfile
+        push: true
+        tags: |
+          ${{ env.QUAY }}/${{ env.BASE_IMAGE }}-base:ext-${{ env.BASE_TAG }}
+          ${{ env.QUAY }}/${{ env.BASE_IMAGE }}-base:latest
+        build-args: |
+          QUAY=${{ env.QUAY }}
+          BASE_IMAGE=${{ env.BASE_IMAGE }}-base
+          BASE_TAG=${{ env.BASE_TAG }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Clean Up
+      if: always()
       shell: pwsh
-      run: Remove-Item -Path ./build -Recurse -Force
+      run: |
+        if (Test-Path ./build) {
+          Remove-Item -Path ./build -Recurse -Force
+        }
