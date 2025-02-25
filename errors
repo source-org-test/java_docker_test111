@@ -1,4 +1,16 @@
+  shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+  env:
+    BASE_IMAGE: fajob
+    BASE_TAG: latest
+    QUAY: registry.cigna.com/cognizant
+    ARTIFACTORY_TOKEN: ***
  Authenticating with Artifactory...
+Write-Error: Failed to process packages: Failed to authenticate with Artifactory: Response status code does not indicate success: 403 (Forbidden).
+Error: Process completed with exit code 1.
+
+=================================
+
+Authenticating with Artifactory...
  Processing package:  v.
 Write-Error: Failed to process packages:  Failed processing  : Response status code does not indicate success: 401 (Unauthorized).
 Error: Process completed with exit code 1.
