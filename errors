@@ -1,3 +1,11 @@
+ Authenticating with Artifactory...
+ Processing package:  v.
+Write-Error: Failed to process packages:  Failed processing  : Response status code does not indicate success: 401 (Unauthorized).
+Error: Process completed with exit code 1.
+
+=================
+
+
 Run $requiredVars = @('BASE_IMAGE', 'BASE_TAG', 'QUAY')
   
 ParserError: C:\a\_temp\643bd70c-913e-4d45-a7a8-3712f787f056.ps1:3
