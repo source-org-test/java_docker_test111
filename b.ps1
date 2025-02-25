@@ -95,7 +95,7 @@ For ($i = 0; $i -lt $keys.Count; $i++) {
     }
 
     # Fetch subpackages list
-    $myUri = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$($keys[$i])/";
+    $myUri = "https://nuget.pkg.github.com/zilvertonz/index.json";
     Write-Output $myUri;
     $content = $(Invoke-WebRequest $myUri).content;
     $links = $(Invoke-WebRequest $myUri).links -as [array];
@@ -117,7 +117,7 @@ For ($i = 0; $i -lt $keys.Count; $i++) {
             $TempLinks = $links[$n].href;
             Write-Output "$TempLinks";
             If ($links[$n].href -like "*$version.$build-*") {
-                $myUri = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$($keys[$i])/$($links[$n].href)";
+                $myUri = "https://nuget.pkg.github.com/zilvertonz/index.json";
                 Write-Output "Downloading $myUri...";
                 $myFile = ".\build\nupkg\temp${n}.zip"
                 Invoke-WebRequest -Uri $myUri -OutFile $myFile
@@ -148,7 +148,7 @@ For ($i = 0; $i -lt $keys.Count; $i++) {
         $lastbuild = $($buildlist | Sort-Object -Descending)[0];
         For ($n = 0; $n -lt $links.Count; $n++) {
             If ($links[$n].href -like "*.$version.$lastbuild-*") {
-                $myUri = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$($keys[$i])/$($links[$n].href)";
+                $myUri = "https://nuget.pkg.github.com/zilvertonz/index.json";
                 Write-Output "Downloading $myUri...";
                 # Change extension of .nupkg to .zip
                 $myFile = ".\build\nupkg\temp${n}.zip"
@@ -170,13 +170,13 @@ For ($i = 0; $i -lt $keys.Count; $i++) {
 
 }
 
-Write-Output "[INFO] Creating & Publishing Docker Image for ${env:QUAY}/${env:BASE_IMAGE}-base:ext-${env:BASE_TAG}"
-docker build --pull . -f .\${env:BASE_IMAGE}\Dockerfile -t ${env:QUAY}/${env:BASE_IMAGE}-base:ext-${env:BASE_TAG}-$($package_version) --no-cache --build-arg QUAY=${env:QUAY} --build-arg BASE_IMAGE=${env:BASE_IMAGE}-base --build-arg BASE_TAG=${env:BASE_TAG}
-#echo ${env:deployerCred} | docker login -u ${env:deployerId} --password-stdin registry.cigna.com
-docker login -u ${env:deployerId} -p ${env:deployerCred} registry.cigna.com
-docker push ${env:QUAY}/${env:BASE_IMAGE}-base:ext-${env:BASE_TAG}-$($package_version)
-docker tag ${env:QUAY}/${env:BASE_IMAGE}-base:ext-${env:BASE_TAG}-$($package_version) ${env:QUAY}/${env:BASE_IMAGE}-base:latest
-docker push ${env:QUAY}/${env:BASE_IMAGE}-base:latest
+# Write-Output "[INFO] Creating & Publishing Docker Image for ${env:QUAY}/${env:BASE_IMAGE}-base:ext-${env:BASE_TAG}"
+# docker build --pull . -f .\${env:BASE_IMAGE}\Dockerfile -t ${env:QUAY}/${env:BASE_IMAGE}-base:ext-${env:BASE_TAG}-$($package_version) --no-cache --build-arg QUAY=${env:QUAY} --build-arg BASE_IMAGE=${env:BASE_IMAGE}-base --build-arg BASE_TAG=${env:BASE_TAG}
+#echo ${env:deployerCred} | docker login -u ${env:deployerId} --password-stdin ghcr.io/zilvertonz/
+# docker login -u ${env:deployerId} -p ${env:deployerCred} ghcr.io/zilvertonz/
+# docker push ${env:QUAY}/${env:BASE_IMAGE}-base:ext-${env:BASE_TAG}-$($package_version)
+# docker tag ${env:QUAY}/${env:BASE_IMAGE}-base:ext-${env:BASE_TAG}-$($package_version) ${env:QUAY}/${env:BASE_IMAGE}-base:latest
+# docker push ${env:QUAY}/${env:BASE_IMAGE}-base:latest
 
 if ( Test-Path .\build ) { Remove-Item .\build -Recurse -Force }
 
