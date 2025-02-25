@@ -1,4 +1,30 @@
-  shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+
+Looking for manifests in: .\fajob
+Found 1 manifest files
+Processing manifest: manifest.json
+  Added/Updated package: package-version (version: )
+  Added/Updated package: usmg-fcts-lpi-calc (version: )
+Writing 2 packages to manifest.json
+Successfully created manifest.json
+
+----------
+manifest.json
+{
+    "package-version": {
+        "build": "1",
+        "version": "1.10",
+        "name": "PACKAGE"
+    },
+    "gbs-fcts-lpi-calc": {
+        "build": "1",
+        "version": "5.0.1",
+        "name": "LPI"
+    }
+}
+-----------
+===============================
+
+shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
   env:
     BASE_IMAGE: fajob
     BASE_TAG: latest
