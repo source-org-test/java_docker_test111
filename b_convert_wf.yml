@@ -22,10 +22,11 @@ jobs:
       uses: actions/setup-pwsh@v2
 
     - name: Validate Environment Variables
+      shell: pwsh
       run: |
-        if (-not $env:BASE_IMAGE) { throw "BASE_IMAGE is not set" }
-        if (-not $env:BASE_TAG) { throw "BASE_TAG is not set" }
-        if (-not $env:QUAY) { throw "QUAY is not set" }
+        if (-not $env:BASE_IMAGE) { throw "ERROR: BASE_IMAGE is not set." }
+        if (-not $env:BASE_TAG) { throw "ERROR: BASE_TAG is not set." }
+        if (-not $env:QUAY) { throw "ERROR: QUAY is not set." }
 
     - name: Clean and Prepare Build Directories
       shell: pwsh
@@ -39,7 +40,7 @@ jobs:
       run: |
         $files = Get-ChildItem -Path ".\$env:BASE_IMAGE" -Recurse -File -Include *manifest.json*
         $packages = @{}
-        
+
         foreach ($file in $files) {
           $content = Get-Content $file.FullName -Raw | ConvertFrom-Json
           foreach ($key in $content.PSObject.Properties.Name) {
@@ -50,7 +51,7 @@ jobs:
         }
         $packages | ConvertTo-Json -Depth 3 | Out-File './manifest.json' -NoNewline -Force
 
-    - name: Download and Extract Packages
+    - name: Download and Extract NuGet Packages
       shell: pwsh
       run: |
         $packages = Get-Content './manifest.json' | ConvertFrom-Json
@@ -59,12 +60,12 @@ jobs:
           $version = $package.Value.version
           $build = $package.Value.build
           $url = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$($name)/"
-          
+
           Write-Output "Fetching package $name version $version build $build..."
           $links = (Invoke-WebRequest $url).Links | Where-Object { $_.href -like "*$version.$build-*" }
 
           if ($links.Count -eq 0) {
-            Write-Output "No package found for $name with version $version and build $build."
+            Write-Output "⚠️ No package found for $name with version $version and build $build."
             continue
           }
 
@@ -77,7 +78,7 @@ jobs:
             New-Item -ItemType "directory" -Path "./build/bin/$name" -Force
             Expand-Archive -Path $outputPath -DestinationPath "./build/nupkg/$name" -Force
 
-            # Move relevant files to the bin directory
+            # Move relevant files to bin directory
             Get-ChildItem -Path "./build/nupkg/$name" -Filter *.dll -Recurse | Move-Item -Destination "./build/bin/$name" -Force
             Get-ChildItem -Path "./build/nupkg/$name" -Filter *.deps.json -Recurse | Move-Item -Destination "./build/bin/$name" -Force
             Get-ChildItem -Path "./build/nupkg/$name" -Filter *.pdb -Recurse | Move-Item -Destination "./build/bin/$name" -Force
