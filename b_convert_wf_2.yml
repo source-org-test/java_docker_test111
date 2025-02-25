@@ -92,11 +92,17 @@ jobs:
             try {
               $content = Get-Content $file.FullName -Raw | ConvertFrom-Json
               foreach ($key in $content.PSObject.Properties.Name) {
-                Write-Output " $key : version: ($content[$key].version)"
-                if (-not $packages.ContainsKey($key) -or 
-                    [version]$packages[$key].version -lt [version]$content[$key].version) {
-                  $packages[$key] = $content[$key]
-                  Write-Output "  Added/Updated package: $key (version: $($content[$key].version))"
+                Write-Output "Processing package: $key"
+                Write-Output "  Version: $($content.$key.version)"
+                Write-Output "  Build: $($content.$key.build)"
+                Write-Output "  Name: $($content.$key.name)"
+                
+                if (-not $packages.ContainsKey($key)) {
+                    $packages[$key] = $content.$key
+                    Write-Output "  Added package: $key (version: $($content.$key.version))"
+                } elseif ([version]$content.$key.version -gt [version]$packages[$key].version) {
+                    $packages[$key] = $content.$key
+                    Write-Output "  Updated package: $key (version: $($content.$key.version))"
                 }
               }
             }
@@ -110,9 +116,27 @@ jobs:
             throw "No packages found in manifest files"
           }
           
-          Write-Output "Writing $($packages.Count) packages to manifest.json"
+          Write-Output "`nPackage summary:"
+          foreach ($key in $packages.Keys) {
+            Write-Output "- $key"
+            Write-Output "  Version: $($packages[$key].version)"
+            Write-Output "  Build: $($packages[$key].build)"
+            Write-Output "  Name: $($packages[$key].name)"
+          }
+          
+          Write-Output "`nWriting $($packages.Count) packages to manifest.json"
           $packages | ConvertTo-Json -Depth 3 | Set-Content './manifest.json' -NoNewline
           Write-Output "Successfully created manifest.json"
+          
+          # Verify the written content
+          $writtenContent = Get-Content './manifest.json' -Raw | ConvertFrom-Json
+          Write-Output "`nVerifying written manifest:"
+          foreach ($key in $writtenContent.PSObject.Properties.Name) {
+            Write-Output "- $key"
+            Write-Output "  Version: $($writtenContent.$key.version)"
+            Write-Output "  Build: $($writtenContent.$key.build)"
+            Write-Output "  Name: $($writtenContent.$key.name)"
+          }
         }
         catch {
           Write-Error "Failed to process manifests: $_"
@@ -128,7 +152,7 @@ jobs:
           }
           
           $manifestContent = Get-Content './manifest.json' -Raw
-          Write-Output "Manifest content preview: $($manifestContent.Substring(0, [Math]::Min(100, $manifestContent.Length)))..."
+          Write-Output "Processing manifest.json..."
           
           $packages = $manifestContent | ConvertFrom-Json
           if (-not $packages -or -not $packages.PSObject.Properties) {
@@ -143,18 +167,29 @@ jobs:
                 continue
             }
             
+            $key = $package.Name
             $name = $package.Value.name
             $version = $package.Value.version
             $build = $package.Value.build
             
-            Write-Output "Processing package: $name v$version.$build"
+            Write-Output "Processing package: $key"
+            Write-Output "  Name: $name"
+            Write-Output "  Version: $version"
+            Write-Output "  Build: $build"
             
             try {
-              # Create package URL without authentication
-              $packageUrl = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$name/$name.$version.$build.nupkg"
+              # Handle special package naming based on manifest
+              $packageFileName = switch ($key) {
+                "package-version" { "PACKAGE.$version.$build.nupkg" }
+                "gbs-fcts-lpi-calc" { "LPI.$version.$build.nupkg" }
+                default { "$name.$version.$build.nupkg" }
+              }
+              
+              $packageUrl = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$name/$packageFileName"
               $outputPath = "./build/nupkg/temp_$name.zip"
               
-              Write-Output "Downloading: $packageUrl"
+              Write-Output "  Downloading: $packageFileName"
+              Write-Output "  URL: $packageUrl"
               
               # Download without authentication headers
               Invoke-WebRequest -Uri $packageUrl -OutFile $outputPath -UseBasicParsing
@@ -171,7 +206,7 @@ jobs:
                 New-Item -ItemType Directory -Path $path -Force | Out-Null
               }
               
-              Write-Output "Extracting package..."
+              Write-Output "  Extracting package..."
               Expand-Archive -Path $outputPath -DestinationPath "./build/nupkg/$name" -Force
               
               # Move required files
@@ -186,15 +221,15 @@ jobs:
               }
               
               if ($movedFiles -eq 0) {
-                Write-Warning "No files were found to move for package: $name"
+                Write-Warning "  No files were found to move for package: $name"
                 continue
               }
               
               Remove-Item -Path $outputPath -Force
-              Write-Output "Successfully processed: $name ($movedFiles files)"
+              Write-Output "  Successfully processed: $name ($movedFiles files)"
             }
             catch {
-              Write-Warning "Failed processing $name : $_"
+              Write-Warning "  Failed processing $name : $_"
               continue
             }
           }
@@ -223,4 +258,3 @@ jobs:
     #       Write-Output "Cleaning up build directory..."
     #       Remove-Item -Path ./build -Recurse -Force
     #     }
-        
