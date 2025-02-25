@@ -94,6 +94,10 @@ jobs:
         ARTIFACTORY_TOKEN: ${{ secrets.PACKAGE_TOKEN }}
       run: |
         try {
+          if (-not $env:ARTIFACTORY_TOKEN) {
+              throw "ARTIFACTORY_TOKEN is not set. Please check the PACKAGE_TOKEN secret is configured."
+          }
+
           # Create headers for Artifactory token authentication
           $headers = @{
             'X-JFrog-Art-Api' = $env:ARTIFACTORY_TOKEN
@@ -101,17 +105,48 @@ jobs:
           
           Write-Output " Authenticating with Artifactory..."
           
+          # Test authentication first
+          $testUrl = "https://cigna.jfrog.io/artifactory/api/system/ping"
+          try {
+              $testResponse = Invoke-WebRequest -Uri $testUrl -Headers $headers -ErrorAction Stop
+              Write-Output " Authentication successful"
+          } catch {
+              throw "Failed to authenticate with Artifactory: $($_.Exception.Message)"
+          }
+          
+          if (-not (Test-Path './manifest.json')) {
+              throw "manifest.json not found. Please ensure the Gather and Process Manifests step completed successfully."
+          }
+          
           $packages = Get-Content './manifest.json' | ConvertFrom-Json
+          if (-not $packages -or -not $packages.PSObject.Properties) {
+              throw "No packages found in manifest.json or file is empty"
+          }
+          
           foreach ($package in $packages.PSObject.Properties) {
+            if (-not $package.Value.name -or -not $package.Value.version -or -not $package.Value.build) {
+                Write-Warning " Skipping invalid package entry: Missing required properties"
+                continue
+            }
+            
             $name = $package.Value.name
             $version = $package.Value.version
             $build = $package.Value.build
+            
+            if ([string]::IsNullOrWhiteSpace($name) -or [string]::IsNullOrWhiteSpace($version) -or [string]::IsNullOrWhiteSpace($build)) {
+                Write-Warning " Skipping package with empty values: name='$name' version='$version' build='$build'"
+                continue
+            }
+            
             $url = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$name/"
             
             Write-Output " Processing package: $name v$version.$build"
             
             try {
+              Write-Output "   Checking repository access: $url"
               $response = Invoke-WebRequest -Uri $url -Headers $headers -ErrorAction Stop
+              
+              Write-Output "   Searching for package matching pattern: *$version.$build-*"
               $packagePattern = "*$version.$build-*"
               $links = $response.Links | Where-Object { $_.href -like $packagePattern }
               
@@ -160,9 +195,14 @@ jobs:
               Write-Output " Successfully processed: $name"
             }
             catch {
-              if ($_.Exception.Response.StatusCode -eq 403) {
-                Write-Error " Authentication failed for $name. Please check Artifactory token."
-                Write-Error "Make sure your token has read permissions for the repository."
+              if ($_.Exception.Response.StatusCode -eq 401) {
+                Write-Error " Authentication failed. Please check your Artifactory token."
+                Write-Error "Response: $($_.Exception.Message)"
+                exit 1
+              }
+              elseif ($_.Exception.Response.StatusCode -eq 403) {
+                Write-Error " Access denied. Please check if your token has the required permissions."
+                Write-Error "Response: $($_.Exception.Message)"
                 exit 1
               }
               Write-Error " Failed processing $name : $_"
@@ -176,6 +216,10 @@ jobs:
         }
         catch {
           Write-Error "Failed to process packages: $_"
+          if ($_.Exception.Response) {
+            Write-Error "Response Status Code: $($_.Exception.Response.StatusCode.value__)"
+            Write-Error "Response Status Description: $($_.Exception.Response.StatusDescription)"
+          }
           exit 1
         }
     
