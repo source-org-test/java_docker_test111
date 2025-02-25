@@ -1,0 +1,8 @@
+Run $packages = Get-Content './manifest.json' | ConvertFrom-Json
+Fetching package  version  build ...
+Invoke-WebRequest: C:\a\_temp\86277237-acd4-4708-9ab2-f7472e9bfe09.ps1:10
+Line |
+  10 |    $links = (Invoke-WebRequest $url).Links | Where-Object { $_.href -l …
+     |              ~~~~~~~~~~~~~~~~~~~~~~
+     |  403 Forbidden  403 Forbidden nginx   
+Error: Process completed with exit code 1.
