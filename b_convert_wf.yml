@@ -1,46 +1,28 @@
-name: Build and Publish Docker Image
+name: Build-Publish-Docker
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '${{ env.BASE_IMAGE }}/**'
-      - '.github/workflows/ci-docker.yml'
   workflow_dispatch:
     inputs:
-      base_image:
-        description: 'Base image name'
-        required: false
       base_tag:
         description: 'Base tag'
-        required: false
-      quay_registry:
-        description: 'Quay registry'
-        required: false
-
+        required: false 
+        default: 'latest'
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  
 env:
-  BASE_IMAGE: ${{ github.event.inputs.base_image || 'your_base_image_name' }}
-  BASE_TAG: ${{ github.event.inputs.base_tag || 'your_base_tag' }}
-  QUAY: ${{ github.event.inputs.quay_registry || 'your_quay_registry' }}
+  BASE_IMAGE: 'fajob' 
+  BASE_TAG: 'latest'
+  QUAY: 'registry.cigna.com/cognizant'
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    
-    permissions:
-      contents: read
-      packages: write
-    
+    runs-on: Windows-Runner
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
-    
-    - name: Set up PowerShell
-      uses: actions/setup-pwsh@v2
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
     
     - name: Validate Environment Variables
       shell: pwsh
@@ -102,7 +84,7 @@ jobs:
     - name: Download and Extract NuGet Packages
       shell: pwsh
       env:
-        ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
+        ARTIFACTORY_TOKEN: $PACKAGE_TOKEN
       run: |
         try {
           # Create headers for Artifactory token authentication
