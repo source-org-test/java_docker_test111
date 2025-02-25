@@ -91,11 +91,11 @@ jobs:
     - name: Download and Extract NuGet Packages
       shell: pwsh
       env:
-        ARTIFACTORY_TOKEN: ${{ secrets.PACKAGE_TOKEN }}
+        ARTIFACTORY_TOKEN: ${{ secrets.MY_PACKAGE_TOKEN }}
       run: |
         try {
           if (-not $env:ARTIFACTORY_TOKEN) {
-              throw "ARTIFACTORY_TOKEN is not set. Please check the PACKAGE_TOKEN secret is configured."
+              throw " ARTIFACTORY_TOKEN is not set. Please check the MY_PACKAGE_TOKEN secret is configured."
           }
 
           # Create headers for Artifactory token authentication
