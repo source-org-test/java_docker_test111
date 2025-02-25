@@ -7,6 +7,7 @@ on:
         description: 'Base tag'
         required: false 
         default: 'latest'
+
 permissions:
   contents: read
   packages: write
@@ -14,7 +15,7 @@ permissions:
   
 env:
   BASE_IMAGE: 'fajob' 
-  BASE_TAG: 'latest'
+  BASE_TAG: ${{ github.event.inputs.base_tag || 'latest' }}
   QUAY: 'registry.cigna.com/cognizant'
 
 jobs:
@@ -28,10 +29,16 @@ jobs:
       shell: pwsh
       run: |
         $requiredVars = @('BASE_IMAGE', 'BASE_TAG', 'QUAY')
-        $missingVars = $requiredVars.Where({ -not $env:$_ })
+        $missingVars = @()
         
-        if ($missingVars) {
-          throw "ERROR: Required environment variables not set: $($missingVars -join ', ')"
+        foreach ($var in $requiredVars) {
+            if (-not (Get-Item env:$var -ErrorAction SilentlyContinue)) {
+                $missingVars += $var
+            }
+        }
+        
+        if ($missingVars.Count -gt 0) {
+            throw "ERROR: Required environment variables not set: $($missingVars -join ', ')"
         }
     
     - name: Prepare Build Directories
@@ -84,7 +91,7 @@ jobs:
     - name: Download and Extract NuGet Packages
       shell: pwsh
       env:
-        ARTIFACTORY_TOKEN: $PACKAGE_TOKEN
+        ARTIFACTORY_TOKEN: ${{ secrets.PACKAGE_TOKEN }}
       run: |
         try {
           # Create headers for Artifactory token authentication
