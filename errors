@@ -1,3 +1,16 @@
+Run $requiredVars = @('BASE_IMAGE', 'BASE_TAG', 'QUAY')
+  
+ParserError: C:\a\_temp\643bd70c-913e-4d45-a7a8-3712f787f056.ps1:3
+Line |
+   3 |  $missingVars = $requiredVars.Where({ -not $env:$_ })
+     |                                            ~~~~~
+     | Variable reference is not valid. ':' was not followed by a valid variable name character. Consider using ${} to
+     | delimit the name.
+Error: Process completed with exit code 1.
+
+==================
+
+
 Run $packages = Get-Content './manifest.json' | ConvertFrom-Json
 Fetching package  version  build ...
 Invoke-WebRequest: C:\a\_temp\86277237-acd4-4708-9ab2-f7472e9bfe09.ps1:10
