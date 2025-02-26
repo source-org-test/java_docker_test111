@@ -1,4 +1,4 @@
-name: Build-Publish-Docker
+name: ci-docker_build
 
 on:
   workflow_dispatch:
