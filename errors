@@ -1,4 +1,31 @@
+Processing manifest.json...
+Found 1 1 packages to process
+Processing package: package-version
+  Name: PACKAGE
+  Version: 1.12
+  Build: 1
+  Found package version: 1.12 (build: 1)
+Processing package: gbs-fcts-lpi-calc
+  Name: LatePaymentInterest_SC
+  Version: 5.0.3
+  Build: 1
+  Downloading: LatePaymentInterest_SC.5.0.3.1-gbs-fcts-lpi-calc.nupkg
+  URL: https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/gbs-fcts-lpi-calc/LatePaymentInterest_SC.5.0.3.1-gbs-fcts-lpi-calc.nupkg
+WARNING:   Failed to download package from https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/gbs-fcts-lpi-calc/LatePaymentInterest_SC.5.0.3.1-gbs-fcts-lpi-calc.nupkg : 
+403 Forbidden
 
+403 Forbidden
+nginx
+
+
+
+Package processing completed. Summary:
+----------------------------------------
+Total packages processed: 0
+Using package version: 1.12 (build: 1)
+----------------------------------------
+
+================================================================
 Run Write-Output "[INFO] Fetching NuGet Packages..."
   Write-Output "[INFO] Fetching NuGet Packages..."
   
