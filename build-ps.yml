@@ -245,7 +245,7 @@ jobs:
                         throw "Download failed - output file not created"
                     }
                 } catch {
-                    $errorMessage = "[ERROR] Failed processing $key: $_"
+                    $errorMessage = "[ERROR] Failed processing ${key} - $_"
                     Write-Error $errorMessage
                     $errorMessage | Out-File ".\logs\${key}_error.log" -Append
                     $hasErrors = $true
@@ -253,7 +253,7 @@ jobs:
                 }
             }
             catch {
-                $errorMessage = "[ERROR] Failed processing $key :`n$_"
+                $errorMessage = "[ERROR] Failed processing ${key} - `n$_"
                 Write-Error $errorMessage
                 $errorMessage | Out-File ".\logs\${key}_error.log" -Append
                 $hasErrors = $true
