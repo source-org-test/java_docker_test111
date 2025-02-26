@@ -155,8 +155,15 @@ jobs:
                 Write-Output "[INFO] Checking: $myUri"
                 
                 try {
-                    # Get the directory listing
-                    $response = Invoke-WebRequest -Uri $myUri -UseBasicParsing
+                    # Set headers to avoid 403 errors
+                    $headers = @{
+                        "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                        "Accept" = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                        "Accept-Language" = "en-US,en;q=0.5"
+                    }
+                    
+                    # Get the directory listing with browser-like headers
+                    $response = Invoke-WebRequest -Uri $myUri -Headers $headers -UseBasicParsing
                     
                     # Print version for debugging
                     Write-Output "$version"
@@ -217,7 +224,7 @@ jobs:
                     
                     # Download the package
                     $outputPath = ".\build\nupkg\$($latestPackage.href)"
-                    Invoke-WebRequest -Uri $downloadUri -OutFile $outputPath -UseBasicParsing
+                    Invoke-WebRequest -Uri $downloadUri -Headers $headers -OutFile $outputPath -UseBasicParsing
                     
                     if (Test-Path $outputPath) {
                         # Extract the package
