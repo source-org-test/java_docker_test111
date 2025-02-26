@@ -123,6 +123,9 @@ jobs:
     
     - name: Download and Process Packages
       shell: pwsh
+      env:
+        ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+        ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
       run: |
         Write-Output "[INFO] Fetching NuGet Packages..."
         
@@ -155,14 +158,14 @@ jobs:
                 Write-Output "[INFO] Checking: $myUri"
                 
                 try {
-                    # Set headers to avoid 403 errors
+                    # Set up authentication for Artifactory
+                    $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $env:ARTIFACTORY_USERNAME, $env:ARTIFACTORY_PASSWORD)))
                     $headers = @{
-                        "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-                        "Accept" = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-                        "Accept-Language" = "en-US,en;q=0.5"
+                        Authorization = "Basic $base64AuthInfo"
+                        "User-Agent" = "PowerShell/7.0"
                     }
                     
-                    # Get the directory listing with browser-like headers
+                    # Get the directory listing with authentication
                     $response = Invoke-WebRequest -Uri $myUri -Headers $headers -UseBasicParsing
                     
                     # Print version for debugging
@@ -222,7 +225,7 @@ jobs:
                     New-Item -ItemType Directory -Path ".\build\nupkg\$name" -Force | Out-Null
                     New-Item -ItemType Directory -Path ".\build\bin\$name" -Force | Out-Null
                     
-                    # Download the package
+                    # Download the package with authentication
                     $outputPath = ".\build\nupkg\$($latestPackage.href)"
                     Invoke-WebRequest -Uri $downloadUri -Headers $headers -OutFile $outputPath -UseBasicParsing
                     
