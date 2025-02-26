@@ -150,71 +150,26 @@ jobs:
             Write-Output "[INFO] Processing $key (version: $version, build: $build)"
             
             try {
-                # Construct the URL exactly as in the original script
-                $myUri = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$key/"
-                Write-Output "[INFO] Checking: $myUri"
+                # Construct the complete URL for the specific package and version
+                $targetVersion = "$version.$build"
+                $packageName = $key
+                
+                # Build the complete NuGet package URL directly
+                # This format matches standard NuGet package URL patterns
+                $packageUrl = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$packageName/$packageName.$targetVersion.nupkg"
+                Write-Output "[INFO] Checking: $packageUrl"
                 
                 try {
-                    $response = Invoke-WebRequest -Uri $myUri -UseBasicParsing
-                    Write-Output "$version"
-                    
-                    # Parse the links from the response
-                    $links = $response.Links | Where-Object { $_.href -ne '../' }
-                    
-                    # Find the specific package based on version and build
-                    $targetVersion = "$version.$build"
-                    $latestVersion = $null
-                    $latestPackage = $null
-                    
-                    # Look for both LatePaymentInterest_SC and LatePaymentInterest_XNET_Core_6 patterns
-                    foreach ($link in $links) {
-                        # Check if the link matches the target version
-                        $linkVersion = [regex]::Match($link.href, "\d+\.\d+\.\d+\.\d+").Value
-                        
-                        if ($link.href -like "*.$targetVersion-*") {
-                            Write-Output "Found exact version match: $($link.href)"
-                            $latestPackage = $link
-                            break
-                        }
-                        
-                        # Print diagnostic info as in original script
-                        if ($linkVersion) {
-                            Write-Output "THIS IS NOT THE LATEST"
-                            Write-Output "$targetVersion"
-                            Write-Output "$($link.href)"
-                        }
-                    }
-                    
-                    # If we didn't find an exact match, look for the latest available
-                    if (-not $latestPackage) {
-                        # Sort links by version number (highest first)
-                        $sortedLinks = $links | Where-Object { 
-                            $_.href -like "*.nupkg" -and $_.href -like "*.$version.*-*" 
-                        } | Sort-Object { 
-                            [regex]::Match($_.href, "\d+\.\d+\.\d+\.(\d+)").Groups[1].Value -as [int] 
-                        } -Descending
-                        
-                        if ($sortedLinks.Count -gt 0) {
-                            $latestPackage = $sortedLinks[0]
-                            Write-Output "Found best matching version: $($latestPackage.href)"
-                        }
-                    }
-                    
-                    if (-not $latestPackage) {
-                        Write-Warning "[WARN] No matching package found for version $version.$build"
-                        continue
-                    }
-                    
-                    $downloadUri = "$myUri$($latestPackage.href)"
-                    Write-Output "Downloading $downloadUri..."
+                    # Try to download the package directly with the constructed URL
+                    $outputPath = ".\build\nupkg\$packageName.$targetVersion.nupkg"
                     
                     # Create directories
                     New-Item -ItemType Directory -Path ".\build\nupkg\$name" -Force | Out-Null
                     New-Item -ItemType Directory -Path ".\build\bin\$name" -Force | Out-Null
                     
-                    # Download the package
-                    $outputPath = ".\build\nupkg\$($latestPackage.href)"
-                    Invoke-WebRequest -Uri $downloadUri -OutFile $outputPath -UseBasicParsing
+                    # Download the package directly
+                    Write-Output "Downloading $packageUrl..."
+                    Invoke-WebRequest -Uri $packageUrl -OutFile $outputPath -UseBasicParsing
                     
                     if (Test-Path $outputPath) {
                         # Extract the package
@@ -242,17 +197,62 @@ jobs:
                         throw "Download failed - output file not created"
                     }
                 } catch {
-                    $statusCode = $_.Exception.Response.StatusCode.value__
-                    $statusDesc = $_.Exception.Response.StatusDescription
-                    $errorMessage = "[ERROR] Failed processing $key"
-                    $errorMessage += "`nStatus Code: $statusCode"
-                    $errorMessage += "`nStatus Description: $statusDesc"
-                    $errorMessage += "`nError: $_"
+                    # If direct package URL fails, try alternate URL formats
+                    Write-Output "[INFO] Direct package URL failed, attempting to find package with alternate URL patterns..."
                     
-                    Write-Error $errorMessage
-                    $errorMessage | Out-File ".\logs\${key}_error.log" -Append
-                    $hasErrors = $true
-                    continue
+                    # Try different NuGet package naming patterns
+                    $alternateUrls = @(
+                        "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$packageName/$packageName.$version.$build.nupkg",
+                        "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$packageName/${packageName}.$version.$build.zip",
+                        "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$packageName/${packageName}.$version.$build-full.nupkg"
+                    )
+                    
+                    $downloaded = $false
+                    foreach ($altUrl in $alternateUrls) {
+                        try {
+                            Write-Output "[INFO] Trying alternate URL: $altUrl"
+                            $fileName = [System.IO.Path]::GetFileName($altUrl)
+                            $outputPath = ".\build\nupkg\$fileName"
+                            
+                            Invoke-WebRequest -Uri $altUrl -OutFile $outputPath -UseBasicParsing -ErrorAction Stop
+                            
+                            if (Test-Path $outputPath) {
+                                Write-Output "[INFO] Successfully downloaded using alternate URL!"
+                                
+                                # Extract the package
+                                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                                [System.IO.Compression.ZipFile]::ExtractToDirectory($outputPath, ".\build\nupkg\$name")
+                                
+                                # Move DLL files to bin directory
+                                Get-ChildItem -Path ".\build\nupkg\$name" -Filter "*.dll" -Recurse | 
+                                    Move-Item -Destination ".\build\bin\$name" -Force
+                                    
+                                # List the files in the bin directory
+                                Get-ChildItem -Path ".\build\bin\$name" | Format-Table Mode, LastWriteTime, Length, Name
+                                
+                                # Cleanup
+                                Remove-Item -Path $outputPath -Force
+                                
+                                $downloaded = $true
+                                break
+                            }
+                        } catch {
+                            Write-Output "[INFO] Alternate URL failed: $altUrl"
+                            continue
+                        }
+                    }
+                    
+                    if (-not $downloaded) {
+                        # If all attempts fail, throw an error
+                        $errorMessage = "[ERROR] Failed to download package $packageName (version: $version, build: $build)"
+                        $errorMessage += "`nTried multiple URL formats but none succeeded"
+                        $errorMessage += "`nCheck if the package exists and you have the correct version information"
+                        $errorMessage += "`nError details: $_"
+                        
+                        Write-Error $errorMessage
+                        $errorMessage | Out-File ".\logs\${key}_error.log" -Append
+                        $hasErrors = $true
+                    }
                 }
             }
             catch {
