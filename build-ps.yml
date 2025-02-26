@@ -1,0 +1,285 @@
+name: Build-Publish-Docker
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_tag:
+        description: 'Base tag'
+        required: false 
+        default: 'latest'
+      docker_package_version:
+        description: 'Version of Dockerfile'
+        default: '0.1.0'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  
+env:
+  BASE_IMAGE: 'fajob' 
+  BASE_TAG: ${{ github.event.inputs.base_tag || 'latest' }}
+  QUAY: 'registry.cigna.com/cognizant'
+  PACKAGE_VERSION: ''
+  PACKAGE_BUILD: ''
+
+jobs:
+  build:
+    runs-on: Windows-Runner
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: Prepare Build Directories
+      shell: pwsh
+      run: |
+        if (Test-Path .\build\bin) { Remove-Item .\build\bin -Recurse -Force }
+        if (Test-Path .\build\nupkg) { Remove-Item .\build\nupkg -Recurse -Force }
+        New-Item -Path ".\build\nupkg" -ItemType "directory" -Force
+        New-Item -Path ".\build\bin" -ItemType "directory" -Force
+    
+    - name: Gather and Process Manifests
+      shell: pwsh
+      run: |
+        # Helper function to convert PSCustomObject to Hashtable
+        function ConvertTo-Hashtable {
+            param (
+                [Parameter(ValueFromPipeline)]
+                $InputObject
+            )
+            process {
+                if ($null -eq $InputObject) { return $null }
+                if ($InputObject -is [System.Collections.IEnumerable] -and $InputObject -isnot [string]) {
+                    $collection = @(
+                        foreach ($object in $InputObject) {
+                            ConvertTo-Hashtable $object
+                        }
+                    )
+                    Write-Output -NoEnumerate $collection
+                } elseif ($InputObject -is [psobject]) {
+                    $hash = @{}
+                    foreach ($property in $InputObject.PSObject.Properties) {
+                        $hash[$property.Name] = ConvertTo-Hashtable $property.Value
+                    }
+                    $hash
+                } else {
+                    $InputObject
+                }
+            }
+        }
+
+        Write-Output "[INFO] Gathering manifests..."
+        
+        # Get list of manifest files
+        $files = $(Get-ChildItem -Path ".\${env:BASE_IMAGE}" -Recurse -File -Include *manifest.json*);
+        Write-Output "[INFO] Found $($files.Count) manifest files"
+        
+        # Translate manifest file content into K,V hashtables
+        $content = @();
+        For ($i = 0; $i -lt $files.Count; $i++) {
+            Write-Output "[INFO] Processing manifest: $($files[$i].Name)"
+            $content += $($files[$i] | Get-Content -Raw | ConvertFrom-Json | ConvertTo-Hashtable);
+        }
+        
+        $packages = @{};
+        For ($i = 0; $i -lt $content.Count; $i++) {
+            # Keys are part of the hashtable and cannot be referenced by index.
+            # So we convert them to a list of strings and iterate through that.
+            $keys = $content[$i].Keys -as [string[]];
+            For ($n = 0; $n -lt $keys.Count; $n++) {
+                $value = $content[$i].$($keys[$n]);
+                # Compare values for each key and drop lowest
+                If (!$packages.ContainsKey($keys[$n])) {
+                    Write-Output "[INFO] Adding package: $($keys[$n]) (version: $($value.version), build: $($value.build))"
+                    $packages.Add($keys[$n], $value);
+                }
+                ElseIf ($packages.$($keys[$n]).version -lt $value.version) {
+                    Write-Output "[INFO] Updating package: $($keys[$n]) (new version: $($value.version), build: $($value.build))"
+                    $packages.$($keys[$n]) = $value;
+                }
+                ElseIf (($packages.$($keys[$n]).version -eq $value.version) -and (($packages.$($keys[$n]).build -lt $value.build -and $packages.$($keys[$n]).build -ne 'latest') -or $value.build -eq 'latest')) {
+                    Write-Output "[INFO] Updating package: $($keys[$n]) (same version, new build: $($value.build))"
+                    $packages.$($keys[$n]) = $value;            
+                }
+            }
+        }
+        
+        Write-Output "[INFO] Writing manifest with $($packages.Count) packages"
+        $packages | ConvertTo-Json | Out-File -FilePath './manifest.json' -NoNewline -Force;
+        
+        # Set package version and build for later use
+        $keys = $packages.Keys -as [string[]];
+        For ($i = 0; $i -lt $keys.Count; $i++) {
+            $name = $packages.$($keys[$i]).name
+            if($name -eq "PACKAGE") { 
+                "PACKAGE_VERSION=$($packages[$keys[$i]].version)" >> $env:GITHUB_ENV
+                "PACKAGE_BUILD=$($packages[$keys[$i]].build)" >> $env:GITHUB_ENV
+                Write-Output "[INFO] Set package version: $($packages[$keys[$i]].version)"
+                break
+            }
+        }
+    
+    - name: Download and Process Packages
+      shell: pwsh
+      run: |
+        Write-Output "[INFO] Fetching NuGet Packages..."
+        
+        $packages = Get-Content './manifest.json' -Raw | ConvertFrom-Json
+        $keys = $packages.PSObject.Properties.Name
+        
+        foreach ($key in $keys) {
+            $name = $packages.$key.name
+            if($name -eq "PACKAGE") { 
+                Write-Output "[INFO] Skipping PACKAGE version entry"
+                continue
+            }
+            
+            $version = $packages.$key.version
+            $build = $packages.$key.build
+            
+            Write-Output "[INFO] Processing $key (version: $version, build: $build)"
+            
+            try {
+                $baseUri = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$key/"
+                Write-Output "[INFO] Checking: $baseUri"
+                
+                $response = Invoke-WebRequest -Uri $baseUri -UseBasicParsing
+                $links = $response.Links | Where-Object { $_.href -ne '../' }
+                
+                if ($build -eq "latest") {
+                    Write-Output "[INFO] Finding latest build for version $version"
+                    $buildList = @()
+                    foreach ($link in $links) {
+                        if ($link.href -like "*.$version.*-*") {
+                            $buildNum = [regex]::Match($link.href, "(?<=\.$version\.).*?(?=-)").Value
+                            if ($buildNum) {
+                                $buildList += [int]$buildNum
+                            }
+                        }
+                    }
+                    
+                    if ($buildList.Count -eq 0) {
+                        Write-Warning "[WARN] No builds found for version $version"
+                        continue
+                    }
+                    
+                    $latestBuild = ($buildList | Sort-Object -Descending)[0]
+                    $build = $latestBuild
+                    Write-Output "[INFO] Latest build: $build"
+                }
+                
+                $packagePattern = "*.$version.$build-*"
+                $packageLink = $links | Where-Object { $_.href -like $packagePattern } | Select-Object -First 1
+                
+                if (-not $packageLink) {
+                    Write-Warning "[WARN] No package found matching pattern: $packagePattern"
+                    continue
+                }
+                
+                $downloadUri = "${baseUri}$($packageLink.href)"
+                $outputPath = ".\build\nupkg\temp_$key.zip"
+                
+                Write-Output "[INFO] Downloading: $downloadUri"
+                Invoke-WebRequest -Uri $downloadUri -OutFile $outputPath -UseBasicParsing
+                
+                if (-not (Test-Path $outputPath)) {
+                    throw "Download failed - output file not created"
+                }
+                
+                Write-Output "[INFO] Creating directories for $name"
+                New-Item -ItemType Directory -Path ".\build\nupkg\$name" -Force | Out-Null
+                New-Item -ItemType Directory -Path ".\build\bin\$name" -Force | Out-Null
+                
+                Write-Output "[INFO] Extracting package..."
+                Expand-Archive -Path $outputPath -DestinationPath ".\build\nupkg\$name" -Force
+                
+                Write-Output "[INFO] Moving files to bin directory..."
+                $fileTypes = @('*.dll', '*.deps.json', '*.pdb')
+                $movedFiles = 0
+                foreach ($type in $fileTypes) {
+                    $files = Get-ChildItem -Path ".\build\nupkg\$name" -Filter $type -Recurse
+                    if ($files) {
+                        $files | Move-Item -Destination ".\build\bin\$name" -Force
+                        $movedFiles += $files.Count
+                    }
+                }
+                
+                Remove-Item -Path $outputPath -Force
+                Write-Output "[INFO] Successfully processed $name ($movedFiles files)"
+                Get-ChildItem -Path ".\build\bin\$name" | ForEach-Object { Write-Output "  - $($_.Name)" }
+            }
+            catch {
+                Write-Warning "[WARN] Failed processing $key : $_"
+                continue
+            }
+        }
+
+    - name: Build Docker Image
+      shell: pwsh
+      run: |
+        Write-Output "[INFO] Building Docker image..."
+        $imageTag = "ext-${env:BASE_TAG}-${env:PACKAGE_VERSION}"
+        $imageName = "${env:QUAY}/${env:BASE_IMAGE}-base"
+        
+        docker build --pull . -f .\${env:BASE_IMAGE}\Dockerfile `
+          -t ${imageName}:${imageTag} `
+          --no-cache `
+          --build-arg QUAY=${env:QUAY} `
+          --build-arg BASE_IMAGE=${env:BASE_IMAGE}-base `
+          --build-arg BASE_TAG=${env:BASE_TAG}
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "[ERROR] Docker build failed"
+            exit 1
+        }
+        
+        Write-Output "[INFO] Successfully built image: ${imageName}:${imageTag}"
+
+    - name: Login to Registry
+      shell: pwsh
+      env:
+        DEPLOYER_ID: ${{ secrets.DEPLOYER_ID }}
+        DEPLOYER_CRED: ${{ secrets.DEPLOYER_CRED }}
+      run: |
+        Write-Output "[INFO] Logging into registry..."
+        docker login -u $env:DEPLOYER_ID -p $env:DEPLOYER_CRED registry.cigna.com
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "[ERROR] Docker login failed"
+            exit 1
+        }
+
+    - name: Push Docker Image
+      shell: pwsh
+      run: |
+        $imageTag = "ext-${env:BASE_TAG}-${env:PACKAGE_VERSION}"
+        $imageName = "${env:QUAY}/${env:BASE_IMAGE}-base"
+        
+        Write-Output "[INFO] Pushing image: ${imageName}:${imageTag}"
+        docker push ${imageName}:${imageTag}
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "[ERROR] Failed to push image: ${imageTag}"
+            exit 1
+        }
+        
+        Write-Output "[INFO] Tagging as latest..."
+        docker tag ${imageName}:${imageTag} ${imageName}:latest
+        
+        Write-Output "[INFO] Pushing latest tag..."
+        docker push ${imageName}:latest
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "[ERROR] Failed to push latest tag"
+            exit 1
+        }
+        
+        Write-Output "[INFO] Successfully pushed all tags"
+
+    - name: Cleanup
+      if: always()
+      shell: pwsh
+      run: |
+        Write-Output "[INFO] Cleaning up build directory..."
+        if (Test-Path .\build) {
+            Remove-Item .\build -Recurse -Force
+        }
