@@ -1,0 +1,341 @@
+name: Build-Publish-Docker
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_tag:
+        description: 'Base tag'
+        required: false 
+        default: 'latest'
+      docker_package_version:
+          description: Version of Dockerfile
+          default: '0.1.0'
+          required: false
+          type: string
+          
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  
+env:
+  BASE_IMAGE: 'fajob' 
+  BASE_TAG: ${{ github.event.inputs.base_tag || 'latest' }}
+  QUAY: 'registry.cigna.com/cognizant'
+
+jobs:
+  build:
+    runs-on: Windows-Runner
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: Validate Environment Variables
+      shell: pwsh
+      run: |
+        $requiredVars = @('BASE_IMAGE', 'BASE_TAG', 'QUAY')
+        $missingVars = @()
+        
+        foreach ($var in $requiredVars) {
+            if (-not (Get-Item env:$var -ErrorAction SilentlyContinue)) {
+                $missingVars += $var
+            }
+        }
+        
+        if ($missingVars.Count -gt 0) {
+            throw "ERROR: Required environment variables not set: $($missingVars -join ', ')"
+        }
+        
+        Write-Output "Environment validation successful"
+        Write-Output "BASE_IMAGE: $env:BASE_IMAGE"
+        Write-Output "BASE_TAG: $env:BASE_TAG"
+        Write-Output "QUAY: $env:QUAY"
+    
+    - name: Prepare Build Directories
+      shell: pwsh
+      run: |
+        $paths = @(
+          "./build/nupkg",
+          "./build/bin"
+        )
+        
+        foreach ($path in $paths) {
+          if (Test-Path $path) {
+            Write-Output "Cleaning existing directory: $path"
+            Remove-Item -Path $path -Recurse -Force
+          }
+          Write-Output "Creating directory: $path"
+          New-Item -Path $path -ItemType Directory -Force | Out-Null
+        }
+    
+    - name: Gather and Process Manifests
+      shell: pwsh
+      run: |
+        # Helper function to convert PSCustomObject to Hashtable
+        function ConvertTo-Hashtable {
+            param (
+                [Parameter(ValueFromPipeline)]
+                $InputObject
+            )
+            process {
+                if ($null -eq $InputObject) { return $null }
+                if ($InputObject -is [System.Collections.IEnumerable] -and $InputObject -isnot [string]) {
+                    $collection = @(
+                        foreach ($object in $InputObject) {
+                            ConvertTo-Hashtable $object
+                        }
+                    )
+                    Write-Output -NoEnumerate $collection
+                } elseif ($InputObject -is [psobject]) {
+                    $hash = @{}
+                    foreach ($property in $InputObject.PSObject.Properties) {
+                        $hash[$property.Name] = ConvertTo-Hashtable $property.Value
+                    }
+                    $hash
+                } else {
+                    $InputObject
+                }
+            }
+        }
+
+        try {
+            Write-Output "[INFO] Gathering manifests..."
+
+            # Get list of manifest files
+            $files = $(Get-ChildItem -Path ".\${env:BASE_IMAGE}" -Recurse -File -Include *manifest.json*);
+            Write-Output "[INFO] Found $($files.Count) manifest files"
+
+            # Translate manifest file content into K,V hashtables
+            $content = @();
+            For ($i = 0; $i -lt $files.Count; $i++) {
+                Write-Output "[INFO] Processing manifest: $($files[$i].Name)"
+                $content += $($files[$i] | Get-Content -Raw | ConvertFrom-Json | ConvertTo-Hashtable);
+            }
+
+            $packages = @{};
+            For ($i = 0; $i -lt $content.Count; $i++) {
+                # Keys are part of the hashtable and cannot be referenced by index.
+                # So we convert them to a list of strings and iterate through that.
+                $keys = $content[$i].Keys -as [string[]];
+                For ($n = 0; $n -lt $keys.Count; $n++) {
+                    $value = $content[$i].$($keys[$n]);
+                    # Compare values for each key and drop lowest
+                    If (!$packages.ContainsKey($keys[$n])) {
+                        Write-Output "[INFO] Adding package: $($keys[$n]) (version: $($value.version), build: $($value.build))"
+                        $packages.Add($keys[$n], $value);
+                    }
+                    ElseIf ($packages.$($keys[$n]).version -lt $value.version) {
+                        Write-Output "[INFO] Updating package: $($keys[$n]) (new version: $($value.version), build: $($value.build))"
+                        $packages.$($keys[$n]) = $value;
+                    }
+                    ElseIf (($packages.$($keys[$n]).version -eq $value.version) -and (($packages.$($keys[$n]).build -lt $value.build -and $packages.$($keys[$n]).build -ne 'latest') -or $value.build -eq 'latest')) {
+                        Write-Output "[INFO] Updating package: $($keys[$n]) (same version, new build: $($value.build))"
+                        $packages.$($keys[$n]) = $value;            
+                    }
+                }
+            }
+
+            Write-Output "[INFO] Writing manifest with $($packages.Count) packages"
+            # Convert K,V pairs back to JSON so we can log it to a file
+            $packages | ConvertTo-Json | Out-File -FilePath './manifest.json' -NoNewline -Force;
+            Write-Output "[INFO] Successfully created manifest.json"
+
+            # Verify the written content
+            $writtenContent = Get-Content './manifest.json' -Raw | ConvertFrom-Json
+            Write-Output "[INFO] Manifest contents:"
+            foreach ($key in $writtenContent.PSObject.Properties.Name) {
+                Write-Output "  - $key"
+                Write-Output "    Version: $($writtenContent.$key.version)"
+                Write-Output "    Build: $($writtenContent.$key.build)"
+                Write-Output "    Name: $($writtenContent.$key.name)"
+            }
+        }
+        catch {
+            Write-Error "Failed to process manifests: $_"
+            exit 1
+        }
+    
+    - name: Download and Process Packages
+      shell: pwsh
+      run: |
+        try {
+          if (-not (Test-Path './manifest.json')) {
+              throw "manifest.json not found. Please ensure the Gather and Process Manifests step completed successfully."
+          }
+          
+          $manifestContent = Get-Content './manifest.json' -Raw
+          Write-Output "Processing manifest.json..."
+          
+          $packages = $manifestContent | ConvertFrom-Json
+          if (-not $packages -or -not $packages.PSObject.Properties) {
+              throw "No packages found in manifest.json or file is empty"
+          }
+          
+          Write-Output "Found $($packages.PSObject.Properties.Count) packages to process"
+          
+          foreach ($package in $packages.PSObject.Properties) {
+            if (-not $package.Value.name -or -not $package.Value.version -or -not $package.Value.build) {
+                Write-Warning "Skipping invalid package entry: Missing required properties"
+                continue
+            }
+            
+            $key = $package.Name
+            $name = $package.Value.name
+            $version = $package.Value.version
+            $build = $package.Value.build
+            
+            Write-Output "Processing package: $key"
+            Write-Output "  Name: $name"
+            Write-Output "  Version: $version"
+            Write-Output "  Build: $build"
+            
+            try {
+              
+              if($package.Value.name -eq "PACKAGE") { 
+                  $package_version = $package.Value.version
+                  $package_build = $package.Value.build
+                  Write-Output "  Found package version: $package_version (build: $package_build)"
+                  
+                  # Store as environment variable for potential later use
+                  $env:PACKAGE_VERSION = $package_version
+                  $env:PACKAGE_BUILD = $package_build
+                  
+                  # Skip downloading this special entry
+                  continue
+              }
+              
+              # Validate package name before proceeding
+              if ([string]::IsNullOrWhiteSpace($name)) {
+                  Write-Warning "  Invalid package name for key '$key'. Skipping."
+                  continue
+              }
+              
+              # Handle special package naming based on manifest
+              $packageFileName = "$name.$version.$build-$key.nupkg"
+              
+              # Construct and validate package URL
+              try {
+                  $packageUrl = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$key/$packageFileName"
+                  Write-Output "  Downloading: $packageFileName"
+                  Write-Output "  URL: $packageUrl"
+              }
+              catch {
+                  Write-Warning "  Failed to construct URL for package '$name': $_"
+                  continue
+              }
+              
+              $outputPath = "./build/nupkg/temp_$name.zip"
+              
+              # Download without authentication headers
+              try {
+                  Invoke-WebRequest -Uri $packageUrl -OutFile $outputPath -UseBasicParsing -ErrorAction Stop
+              }
+              catch {
+                  Write-Warning "  Failed to download package from $packageUrl : $_"
+                  continue
+              }
+              
+              if (-not (Test-Path $outputPath)) {
+                throw "Download failed - output file not created"
+              }
+              
+              $paths = @(
+                "./build/nupkg/$name",
+                "./build/bin/$name"
+              )
+              foreach ($path in $paths) {
+                New-Item -ItemType Directory -Path $path -Force | Out-Null
+              }
+              
+              Write-Output "  Extracting package..."
+              try {
+                  Expand-Archive -Path $outputPath -DestinationPath "./build/nupkg/$name" -Force -ErrorAction Stop
+              }
+              catch {
+                  Write-Warning "  Failed to extract package: $_"
+                  # Clean up the failed download
+                  if (Test-Path $outputPath) {
+                      Remove-Item -Path $outputPath -Force
+                  }
+                  continue
+              }
+              
+              # Move required files
+              $fileTypes = @('*.dll', '*.deps.json', '*.pdb')
+              $movedFiles = 0
+              foreach ($type in $fileTypes) {
+                $files = Get-ChildItem -Path "./build/nupkg/$name" -Filter $type -Recurse
+                if ($files) {
+                  try {
+                      $files | Move-Item -Destination "./build/bin/$name" -Force -ErrorAction Stop
+                      $movedFiles += $files.Count
+                      Write-Output "  Moved $($files.Count) $type files"
+                  }
+                  catch {
+                      Write-Warning "  Failed to move $type files: $_"
+                  }
+                }
+              }
+              
+              if ($movedFiles -eq 0) {
+                Write-Warning "  No files were found to move for package: $name"
+                # Clean up extracted files if no usable files were found
+                if (Test-Path "./build/nupkg/$name") {
+                    Remove-Item -Path "./build/nupkg/$name" -Recurse -Force
+                }
+                continue
+              }
+              
+              Remove-Item -Path $outputPath -Force
+              Write-Output "  Successfully processed: $name ($movedFiles files)"
+            }
+            catch {
+              Write-Warning "  Failed processing $name : $_"
+              continue
+            }
+          }
+          
+          # Generate a summary report of processed packages
+          $processedPackages = Get-ChildItem -Path "./build/bin" -Directory
+          Write-Output "Package processing completed. Summary:"
+          Write-Output "----------------------------------------"
+          Write-Output "Total packages processed: $($processedPackages.Count)"
+          
+          if ($processedPackages.Count -gt 0) {
+            foreach ($pkg in $processedPackages) {
+              $fileCount = (Get-ChildItem -Path $pkg.FullName -Recurse -File).Count
+              Write-Output "- $($pkg.Name): $fileCount files"
+            }
+          }
+          
+          # Check if package version was found and set
+          if ($env:PACKAGE_VERSION) {
+            Write-Output "Using package version: $env:PACKAGE_VERSION (build: $env:PACKAGE_BUILD)"
+          } else {
+            Write-Warning "No package version information found in manifest"
+          }
+          
+          Write-Output "----------------------------------------"
+        }
+        catch {
+          Write-Error "Failed to process packages: $_"
+          exit 1
+        }
+
+  CI:
+    uses: zilvertonz/usmg-gdem-ghactions-workflows/.github/workflows/ci.yml@v1
+    with:
+        project-type: "docker"
+        docker_package_version: ${{ inputs.docker_package_version }}
+        bypass_linting: true # Disables linting
+        dockerfile_path: 'fajob' # <--- Dockerfile path
+        docker_image_name: 'usmg-facets-fajob-test' # <--- Name of your Docker image. By DEFAULT the name will be the name of repo.
+        
+    # - name: Clean Up
+    #   if: always()
+    #   shell: pwsh
+    #   run: |
+    #     if (Test-Path ./build) {
+    #       Write-Output "Cleaning up build directory..."
+    #       Remove-Item -Path ./build -Recurse -Force
+    #     }
