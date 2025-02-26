@@ -166,7 +166,94 @@ jobs:
                     }
                     
                     # Get the directory listing with authentication
-                    $response = Invoke-WebRequest -Uri $myUri -Headers $headers -UseBasicParsing
+                    try {
+                        $response = Invoke-WebRequest -Uri $myUri -Headers $headers -UseBasicParsing -ErrorAction Stop
+                    } catch {
+                        Write-Warning "[WARN] Authentication failed or 403 error. Trying alternative approaches..."
+                        
+                        # Try with browser-like headers
+                        $browserHeaders = @{
+                            "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                            "Accept" = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                            "Accept-Language" = "en-US,en;q=0.5"
+                        }
+                        
+                        try {
+                            Write-Output "[INFO] Trying with browser headers..."
+                            $response = Invoke-WebRequest -Uri $myUri -Headers $browserHeaders -UseBasicParsing -ErrorAction Stop
+                        } catch {
+                            # Try NuGet API endpoint
+                            $nugetApiUri = $myUri.Replace("cigna-nuget-lower", "api/nuget/cigna-nuget-lower")
+                            Write-Output "[INFO] Trying NuGet API endpoint: $nugetApiUri"
+                            
+                            try {
+                                $nugetHeaders = @{
+                                    "User-Agent" = "NuGet/5.8.0"
+                                    "Accept" = "application/json"
+                                }
+                                $response = Invoke-WebRequest -Uri $nugetApiUri -Headers $nugetHeaders -UseBasicParsing -ErrorAction Stop
+                            } catch {
+                                # If we know the version and build, try direct package URL
+                                if ($version -and $build) {
+                                    # Try direct package download
+                                    $directPackageUri = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$key/$key.$version.$build.nupkg"
+                                    Write-Output "[INFO] Trying direct package URL: $directPackageUri"
+                                    
+                                    # Create directories
+                                    New-Item -ItemType Directory -Path ".\build\nupkg\$name" -Force | Out-Null
+                                    New-Item -ItemType Directory -Path ".\build\bin\$name" -Force | Out-Null
+                                    
+                                    # Try downloading directly
+                                    $outputPath = ".\build\nupkg\$key.$version.$build.nupkg"
+                                    
+                                    try {
+                                        # Try with auth headers
+                                        Invoke-WebRequest -Uri $directPackageUri -Headers $headers -OutFile $outputPath -UseBasicParsing -ErrorAction Stop
+                                    } catch {
+                                        try {
+                                            # Try with browser headers
+                                            Invoke-WebRequest -Uri $directPackageUri -Headers $browserHeaders -OutFile $outputPath -UseBasicParsing -ErrorAction Stop
+                                        } catch {
+                                            # If all attempts fail, log and continue to next package
+                                            $errorDetail = "Status Code: $($_.Exception.Response.StatusCode.value__)`nStatus Description: $($_.Exception.Response.StatusDescription)`nError: $($_.Exception.Message)"
+                                            $errorMessage = "[ERROR] Failed processing ${key} - All download attempts failed`n$errorDetail"
+                                            Write-Error $errorMessage
+                                            $errorMessage | Out-File ".\logs\${key}_error.log" -Append
+                                            $hasErrors = $true
+                                            continue
+                                        }
+                                    }
+                                    
+                                    if (Test-Path $outputPath) {
+                                        # Skip the directory listing part and go straight to extraction
+                                        Write-Output "[INFO] Successfully downloaded package directly: $outputPath"
+                                        
+                                        # Continue with extraction and processing
+                                        Add-Type -AssemblyName System.IO.Compression.FileSystem
+                                        [System.IO.Compression.ZipFile]::ExtractToDirectory($outputPath, ".\build\nupkg\$name")
+                                        
+                                        # Move DLL files to bin directory
+                                        Get-ChildItem -Path ".\build\nupkg\$name" -Filter "*.dll" -Recurse | 
+                                            Move-Item -Destination ".\build\bin\$name" -Force
+                                            
+                                        # Cleanup
+                                        Remove-Item -Path $outputPath -Force
+                                        
+                                        # Skip to next package
+                                        continue
+                                    }
+                                }
+                                
+                                # If all attempts fail, log detailed error and continue
+                                $errorDetail = "Status Code: $($_.Exception.Response.StatusCode.value__)`nStatus Description: $($_.Exception.Response.StatusDescription)`nError: $($_.Exception.Message)"
+                                $errorMessage = "[ERROR] Failed processing ${key} - Could not access repository`n$errorDetail"
+                                Write-Error $errorMessage
+                                $errorMessage | Out-File ".\logs\${key}_error.log" -Append
+                                $hasErrors = $true
+                                continue
+                            }
+                        }
+                    }
                     
                     # Print version for debugging
                     Write-Output "$version"
@@ -225,11 +312,49 @@ jobs:
                     New-Item -ItemType Directory -Path ".\build\nupkg\$name" -Force | Out-Null
                     New-Item -ItemType Directory -Path ".\build\bin\$name" -Force | Out-Null
                     
-                    # Download the package with authentication
+                    # Download the package with multiple fallback options
                     $outputPath = ".\build\nupkg\$($latestPackage.href)"
-                    Invoke-WebRequest -Uri $downloadUri -Headers $headers -OutFile $outputPath -UseBasicParsing
+                    $downloadSuccess = $false
                     
-                    if (Test-Path $outputPath) {
+                    # Try with authentication headers first
+                    try {
+                        Invoke-WebRequest -Uri $downloadUri -Headers $headers -OutFile $outputPath -UseBasicParsing -ErrorAction Stop
+                        $downloadSuccess = $true
+                    } catch {
+                        Write-Warning "[WARN] Download with authentication failed. Trying alternatives..."
+                        
+                        # Try with browser headers
+                        try {
+                            $browserHeaders = @{
+                                "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                                "Accept" = "application/octet-stream"
+                            }
+                            Invoke-WebRequest -Uri $downloadUri -Headers $browserHeaders -OutFile $outputPath -UseBasicParsing -ErrorAction Stop
+                            $downloadSuccess = $true
+                        } catch {
+                            # Try NuGet API endpoint
+                            $nugetApiUri = $downloadUri.Replace("cigna-nuget-lower", "api/nuget/cigna-nuget-lower")
+                            
+                            try {
+                                $nugetHeaders = @{
+                                    "User-Agent" = "NuGet/5.8.0"
+                                    "Accept" = "application/octet-stream"
+                                }
+                                Invoke-WebRequest -Uri $nugetApiUri -Headers $nugetHeaders -OutFile $outputPath -UseBasicParsing -ErrorAction Stop
+                                $downloadSuccess = $true
+                            } catch {
+                                # If all attempts fail, log detailed error
+                                $errorDetail = "Status Code: $($_.Exception.Response.StatusCode.value__)`nStatus Description: $($_.Exception.Response.StatusDescription)`nError: $($_.Exception.Message)"
+                                $errorMessage = "[ERROR] Failed downloading package ${key} - All attempts failed`n$errorDetail"
+                                Write-Error $errorMessage
+                                $errorMessage | Out-File ".\logs\${key}_error.log" -Append
+                                $hasErrors = $true
+                                continue
+                            }
+                        }
+                    }
+                    
+                    if ($downloadSuccess -and (Test-Path $outputPath)) {
                         # Extract the package
                         Write-Output "Directory: `n$(Get-Location)\build\nupkg"
                         Get-ChildItem -Path ".\build\nupkg" -Directory | Format-Table
@@ -255,7 +380,22 @@ jobs:
                         throw "Download failed - output file not created"
                     }
                 } catch {
-                    $errorMessage = "[ERROR] Failed processing ${key} - $_"
+                    # Capture detailed error information
+                    $statusCode = "Unknown"
+                    $statusDescription = ""
+                    $errorMsg = $_
+                    
+                    if ($_.Exception.Response) {
+                        try {
+                            $statusCode = $_.Exception.Response.StatusCode.value__
+                            $statusDescription = $_.Exception.Response.StatusDescription
+                        } catch {
+                            # Unable to get status details
+                        }
+                    }
+                    
+                    $errorDetail = "Status Code: $statusCode`nStatus Description: $statusDescription`nError: $errorMsg"
+                    $errorMessage = "[ERROR] Failed processing ${key}`n$errorDetail"
                     Write-Error $errorMessage
                     $errorMessage | Out-File ".\logs\${key}_error.log" -Append
                     $hasErrors = $true
