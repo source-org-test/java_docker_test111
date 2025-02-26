@@ -126,8 +126,12 @@ jobs:
       run: |
         Write-Output "[INFO] Fetching NuGet Packages..."
         
+        # Create error log directory
+        New-Item -ItemType Directory -Path ".\logs" -Force | Out-Null
+        
         $packages = Get-Content './manifest.json' -Raw | ConvertFrom-Json
         $keys = $packages.PSObject.Properties.Name
+        $hasErrors = $false
         
         foreach ($key in $keys) {
             $name = $packages.$key.name
@@ -145,6 +149,33 @@ jobs:
                 $baseUri = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$key/"
                 Write-Output "[INFO] Checking: $baseUri"
                 
+                # First try a HEAD request to check access
+                try {
+                    $headers = @{
+                        'Accept' = 'application/json'
+                    }
+                    $testResponse = Invoke-WebRequest -Uri $baseUri -Method Head -UseBasicParsing -Headers $headers
+                    Write-Output "[INFO] Repository access check successful"
+                } catch {
+                    $statusCode = $_.Exception.Response.StatusCode.value__
+                    $statusDesc = $_.Exception.Response.StatusDescription
+                    $errorMessage = "[ERROR] Repository access check failed for $key"
+                    $errorMessage += "`nStatus Code: $statusCode"
+                    $errorMessage += "`nStatus Description: $statusDesc"
+                    
+                    if ($statusCode -eq 403) {
+                        $errorMessage += "`nAccess Forbidden - Please check:"
+                        $errorMessage += "`n1. Repository path is correct"
+                        $errorMessage += "`n2. Network access is available"
+                        $errorMessage += "`n3. Artifactory permissions are set correctly"
+                    }
+                    
+                    Write-Error $errorMessage
+                    $errorMessage | Out-File ".\logs\${key}_error.log" -Append
+                    $hasErrors = $true
+                    continue
+                }
+                
                 $response = Invoke-WebRequest -Uri $baseUri -UseBasicParsing
                 $links = $response.Links | Where-Object { $_.href -ne '../' }
                 
@@ -161,7 +192,9 @@ jobs:
                     }
                     
                     if ($buildList.Count -eq 0) {
-                        Write-Warning "[WARN] No builds found for version $version"
+                        $errorMessage = "[WARN] No builds found for version $version"
+                        Write-Warning $errorMessage
+                        $errorMessage | Out-File ".\logs\${key}_error.log" -Append
                         continue
                     }
                     
@@ -174,7 +207,9 @@ jobs:
                 $packageLink = $links | Where-Object { $_.href -like $packagePattern } | Select-Object -First 1
                 
                 if (-not $packageLink) {
-                    Write-Warning "[WARN] No package found matching pattern: $packagePattern"
+                    $errorMessage = "[WARN] No package found matching pattern: $packagePattern"
+                    Write-Warning $errorMessage
+                    $errorMessage | Out-File ".\logs\${key}_error.log" -Append
                     continue
                 }
                 
@@ -211,9 +246,21 @@ jobs:
                 Get-ChildItem -Path ".\build\bin\$name" | ForEach-Object { Write-Output "  - $($_.Name)" }
             }
             catch {
-                Write-Warning "[WARN] Failed processing $key : $_"
+                $errorMessage = "[ERROR] Failed processing $key :`n$_"
+                Write-Error $errorMessage
+                $errorMessage | Out-File ".\logs\${key}_error.log" -Append
+                $hasErrors = $true
                 continue
             }
+        }
+        
+        if ($hasErrors) {
+            Write-Output "[INFO] Errors occurred during package processing. Check logs directory for details."
+            Get-ChildItem -Path ".\logs" -Filter "*_error.log" | ForEach-Object {
+                Write-Output "`nErrors for $($_.BaseName):"
+                Get-Content $_.FullName | ForEach-Object { Write-Output "  $_" }
+            }
+            exit 1
         }
 
     - name: Build Docker Image
