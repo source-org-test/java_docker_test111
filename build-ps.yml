@@ -132,11 +132,15 @@ jobs:
         $packages = Get-Content './manifest.json' -Raw | ConvertFrom-Json
         $keys = $packages.PSObject.Properties.Name
         $hasErrors = $false
+        $package_version = ""
+        $package_build = ""
         
         foreach ($key in $keys) {
             $name = $packages.$key.name
             if($name -eq "PACKAGE") { 
-                Write-Output "[INFO] Skipping PACKAGE version entry"
+                $package_version = $packages.$key.version
+                $package_build = $packages.$key.build
+                Write-Output "package version $package_version"
                 continue
             }
             
@@ -146,104 +150,110 @@ jobs:
             Write-Output "[INFO] Processing $key (version: $version, build: $build)"
             
             try {
-                $baseUri = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$key/"
-                Write-Output "[INFO] Checking: $baseUri"
+                # Construct the URL exactly as in the original script
+                $myUri = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$key/"
+                Write-Output "[INFO] Checking: $myUri"
                 
-                # First try a HEAD request to check access
                 try {
-                    $headers = @{
-                        'Accept' = 'application/json'
+                    $response = Invoke-WebRequest -Uri $myUri -UseBasicParsing
+                    Write-Output "$version"
+                    
+                    # Parse the links from the response
+                    $links = $response.Links | Where-Object { $_.href -ne '../' }
+                    
+                    # Find the specific package based on version and build
+                    $targetVersion = "$version.$build"
+                    $latestVersion = $null
+                    $latestPackage = $null
+                    
+                    # Look for both LatePaymentInterest_SC and LatePaymentInterest_XNET_Core_6 patterns
+                    foreach ($link in $links) {
+                        # Check if the link matches the target version
+                        $linkVersion = [regex]::Match($link.href, "\d+\.\d+\.\d+\.\d+").Value
+                        
+                        if ($link.href -like "*.$targetVersion-*") {
+                            Write-Output "Found exact version match: $($link.href)"
+                            $latestPackage = $link
+                            break
+                        }
+                        
+                        # Print diagnostic info as in original script
+                        if ($linkVersion) {
+                            Write-Output "THIS IS NOT THE LATEST"
+                            Write-Output "$targetVersion"
+                            Write-Output "$($link.href)"
+                        }
                     }
-                    $testResponse = Invoke-WebRequest -Uri $baseUri -Method Head -UseBasicParsing -Headers $headers
-                    Write-Output "[INFO] Repository access check successful"
+                    
+                    # If we didn't find an exact match, look for the latest available
+                    if (-not $latestPackage) {
+                        # Sort links by version number (highest first)
+                        $sortedLinks = $links | Where-Object { 
+                            $_.href -like "*.nupkg" -and $_.href -like "*.$version.*-*" 
+                        } | Sort-Object { 
+                            [regex]::Match($_.href, "\d+\.\d+\.\d+\.(\d+)").Groups[1].Value -as [int] 
+                        } -Descending
+                        
+                        if ($sortedLinks.Count -gt 0) {
+                            $latestPackage = $sortedLinks[0]
+                            Write-Output "Found best matching version: $($latestPackage.href)"
+                        }
+                    }
+                    
+                    if (-not $latestPackage) {
+                        Write-Warning "[WARN] No matching package found for version $version.$build"
+                        continue
+                    }
+                    
+                    $downloadUri = "$myUri$($latestPackage.href)"
+                    Write-Output "Downloading $downloadUri..."
+                    
+                    # Create directories
+                    New-Item -ItemType Directory -Path ".\build\nupkg\$name" -Force | Out-Null
+                    New-Item -ItemType Directory -Path ".\build\bin\$name" -Force | Out-Null
+                    
+                    # Download the package
+                    $outputPath = ".\build\nupkg\$($latestPackage.href)"
+                    Invoke-WebRequest -Uri $downloadUri -OutFile $outputPath -UseBasicParsing
+                    
+                    if (Test-Path $outputPath) {
+                        # Extract the package
+                        Write-Output "Directory: `n$(Get-Location)\build\nupkg"
+                        Get-ChildItem -Path ".\build\nupkg" -Directory | Format-Table
+                        
+                        # Extract the nupkg (which is a zip file)
+                        Add-Type -AssemblyName System.IO.Compression.FileSystem
+                        [System.IO.Compression.ZipFile]::ExtractToDirectory($outputPath, ".\build\nupkg\$name")
+                        
+                        Write-Output "Directory: $(Get-Location)\build\bin"
+                        Get-ChildItem -Path ".\build\bin" -Directory | Format-Table
+                        
+                        # Move DLL files to bin directory
+                        Write-Output "Directory: `n$(Get-Location)\build\bin\$name"
+                        Get-ChildItem -Path ".\build\nupkg\$name" -Filter "*.dll" -Recurse | 
+                            Move-Item -Destination ".\build\bin\$name" -Force
+                            
+                        # List the files in the bin directory
+                        Get-ChildItem -Path ".\build\bin\$name" | Format-Table Mode, LastWriteTime, Length, Name
+                        
+                        # Cleanup
+                        Remove-Item -Path $outputPath -Force
+                    } else {
+                        throw "Download failed - output file not created"
+                    }
                 } catch {
                     $statusCode = $_.Exception.Response.StatusCode.value__
                     $statusDesc = $_.Exception.Response.StatusDescription
-                    $errorMessage = "[ERROR] Repository access check failed for $key"
+                    $errorMessage = "[ERROR] Failed processing $key"
                     $errorMessage += "`nStatus Code: $statusCode"
                     $errorMessage += "`nStatus Description: $statusDesc"
-                    
-                    if ($statusCode -eq 403) {
-                        $errorMessage += "`nAccess Forbidden - Please check:"
-                        $errorMessage += "`n1. Repository path is correct"
-                        $errorMessage += "`n2. Network access is available"
-                        $errorMessage += "`n3. Artifactory permissions are set correctly"
-                    }
+                    $errorMessage += "`nError: $_"
                     
                     Write-Error $errorMessage
                     $errorMessage | Out-File ".\logs\${key}_error.log" -Append
                     $hasErrors = $true
                     continue
                 }
-                
-                $response = Invoke-WebRequest -Uri $baseUri -UseBasicParsing
-                $links = $response.Links | Where-Object { $_.href -ne '../' }
-                
-                if ($build -eq "latest") {
-                    Write-Output "[INFO] Finding latest build for version $version"
-                    $buildList = @()
-                    foreach ($link in $links) {
-                        if ($link.href -like "*.$version.*-*") {
-                            $buildNum = [regex]::Match($link.href, "(?<=\.$version\.).*?(?=-)").Value
-                            if ($buildNum) {
-                                $buildList += [int]$buildNum
-                            }
-                        }
-                    }
-                    
-                    if ($buildList.Count -eq 0) {
-                        $errorMessage = "[WARN] No builds found for version $version"
-                        Write-Warning $errorMessage
-                        $errorMessage | Out-File ".\logs\${key}_error.log" -Append
-                        continue
-                    }
-                    
-                    $latestBuild = ($buildList | Sort-Object -Descending)[0]
-                    $build = $latestBuild
-                    Write-Output "[INFO] Latest build: $build"
-                }
-                
-                $packagePattern = "*.$version.$build-*"
-                $packageLink = $links | Where-Object { $_.href -like $packagePattern } | Select-Object -First 1
-                
-                if (-not $packageLink) {
-                    $errorMessage = "[WARN] No package found matching pattern: $packagePattern"
-                    Write-Warning $errorMessage
-                    $errorMessage | Out-File ".\logs\${key}_error.log" -Append
-                    continue
-                }
-                
-                $downloadUri = "${baseUri}$($packageLink.href)"
-                $outputPath = ".\build\nupkg\temp_$key.zip"
-                
-                Write-Output "[INFO] Downloading: $downloadUri"
-                Invoke-WebRequest -Uri $downloadUri -OutFile $outputPath -UseBasicParsing
-                
-                if (-not (Test-Path $outputPath)) {
-                    throw "Download failed - output file not created"
-                }
-                
-                Write-Output "[INFO] Creating directories for $name"
-                New-Item -ItemType Directory -Path ".\build\nupkg\$name" -Force | Out-Null
-                New-Item -ItemType Directory -Path ".\build\bin\$name" -Force | Out-Null
-                
-                Write-Output "[INFO] Extracting package..."
-                Expand-Archive -Path $outputPath -DestinationPath ".\build\nupkg\$name" -Force
-                
-                Write-Output "[INFO] Moving files to bin directory..."
-                $fileTypes = @('*.dll', '*.deps.json', '*.pdb')
-                $movedFiles = 0
-                foreach ($type in $fileTypes) {
-                    $files = Get-ChildItem -Path ".\build\nupkg\$name" -Filter $type -Recurse
-                    if ($files) {
-                        $files | Move-Item -Destination ".\build\bin\$name" -Force
-                        $movedFiles += $files.Count
-                    }
-                }
-                
-                Remove-Item -Path $outputPath -Force
-                Write-Output "[INFO] Successfully processed $name ($movedFiles files)"
-                Get-ChildItem -Path ".\build\bin\$name" | ForEach-Object { Write-Output "  - $($_.Name)" }
             }
             catch {
                 $errorMessage = "[ERROR] Failed processing $key :`n$_"
