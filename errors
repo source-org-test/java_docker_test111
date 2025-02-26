@@ -1,5 +1,20 @@
 Run Write-Output "[INFO] Fetching NuGet Packages..."
 [INFO] Fetching NuGet Packages...
+[INFO] Processing gbs-fcts-lpi-calc (version: 5.0.3, build: 1)
+[INFO] Checking: https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/gbs-fcts-lpi-calc/
+Write-Error: [ERROR] Failed processing gbs-fcts-lpi-calc :
+Error: [ERROR] Repository access check failed for gbs-fcts-lpi-calc
+Status Code: 403
+Status Description: 
+Access Forbidden - Please check:
+1. Repository path is correct
+2. Network access is available
+3. Artifactory permissions are set correctly
+Error: Process completed with exit code 1.
+
+================================
+Run Write-Output "[INFO] Fetching NuGet Packages..."
+[INFO] Fetching NuGet Packages...
 [INFO] Skipping PACKAGE version entry
 [INFO] Processing gbs-fcts-lpi-calc (version: 5.0.3, build: 1)
 [INFO] Checking: https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/gbs-fcts-lpi-calc/
