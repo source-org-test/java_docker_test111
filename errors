@@ -1,3 +1,10 @@
+
+==================
+Creating sample dll for testing 
+Add-Type -TypeDefinition 'namespace SampleLibrary { public class TestClass { public string GetMessage() { return "Hello from Sample DLL!"; } } }' -Language CSharp -OutputAssembly SampleLibrary.dll
+
+====================
+
 Processing manifest.json...
 Found 1 1 packages to process
 Processing package: package-version
