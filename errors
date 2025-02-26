@@ -1,3 +1,19 @@
+Run Write-Output "[INFO] Fetching NuGet Packages..."
+[INFO] Fetching NuGet Packages...
+[INFO] Skipping PACKAGE version entry
+[INFO] Processing gbs-fcts-lpi-calc (version: 5.0.3, build: 1)
+[INFO] Checking: https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/gbs-fcts-lpi-calc/
+WARNING: [WARN] Failed processing gbs-fcts-lpi-calc : 
+403 Forbidden
+
+403 Forbidden
+nginx
+
+
+=================================
+
+
+
 
 Looking for manifests in: .\fajob
 Found 1 manifest files
