@@ -1,5 +1,24 @@
 Run Write-Output "[INFO] Fetching NuGet Packages..."
 [INFO] Fetching NuGet Packages...
+package version 1.12
+[INFO] Processing gbs-fcts-lpi-calc (version: 5.0.3, build: 1)
+[INFO] Checking: https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/gbs-fcts-lpi-calc/
+Write-Error: [ERROR] Failed processing gbs-fcts-lpi-calc :
+Error: [ERROR] Failed processing gbs-fcts-lpi-calc
+Status Code: 403
+Status Description: 
+Error: 
+403 Forbidden
+
+403 Forbidden
+nginx
+
+
+Error: Process completed with exit code 1.
+==============================================
+
+Run Write-Output "[INFO] Fetching NuGet Packages..."
+[INFO] Fetching NuGet Packages...
 [INFO] Processing gbs-fcts-lpi-calc (version: 5.0.3, build: 1)
 [INFO] Checking: https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/gbs-fcts-lpi-calc/
 Write-Error: [ERROR] Failed processing gbs-fcts-lpi-calc :
