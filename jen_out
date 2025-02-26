@@ -1,0 +1,1026 @@
+[Pipeline] { (Build & Push Image)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] withCredentials
+Masking supported pattern matches of %deployerCred% or %artifactoryId% or %artifactoryCred%
+[Pipeline] {
+[Pipeline] pwsh
+
+    Directory: C:\jenkins\agent\workspace\orchestrators-folders\fcts-extensions\image-builds\gbs-facets-fajob\build
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            2/7/2025  3:53 PM                nupkg
+d----            2/7/2025  3:53 PM                bin
+[INFO] Gathering manifests...
+[INFO] Fetching NuGet Packages...
+package version 1.12
+https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/gbs-fcts-lpi-calc/
+5.0.3
+THIS IS NOT THE LATEST
+5.0.3.1
+DataAccess.1.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+DataAccess.1.0.1.2-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+DataAccess.1.2.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+DataAccess.1.3.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+DataAccess.1.4.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+DataAccess.1.4.0.2-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+DataAccess.1.4.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+DataAccess.1.5.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+DataAccess.1.6.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.1.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.1.0.1.2-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.1.2.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.1.3.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.1.4.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.1.4.0.2-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.1.4.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.1.5.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.1.6.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.0.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.0.2.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.0.3.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.0.4.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.0.5.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.1.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.1.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.1.2.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.1.3.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.1.4.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.1.5.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.1.6.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.1.7.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.2.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.2.3.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.3.0.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.3.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.4.0.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.4.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.4.0.2.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.4.0.3.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.4.0.4.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.4.0.5.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.5.0.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.5.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.5.0.2.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_SC.5.0.3.1-gbs-fcts-lpi-calc.nupkg
+Downloading https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/gbs-fcts-lpi-calc/LatePaymentInterest_SC.5.0.3.1-gbs-fcts-lpi-calc.nupkg...
+
+    Directory: 
+C:\jenkins\agent\workspace\orchestrators-folders\fcts-extensions\image-builds\gbs-facets-fajob\build\nupkg
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            2/7/2025  3:53 PM                LPI
+
+    Directory: C:\jenkins\agent\workspace\orchestrators-folders\fcts-extensions\image-builds\gbs-facets-fajob\build\bin
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            2/7/2025  3:53 PM                LPI
+
+    Directory: 
+C:\jenkins\agent\workspace\orchestrators-folders\fcts-extensions\image-builds\gbs-facets-fajob\build\bin\LPI
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-console-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-console-l1-2-0.dll
+-a---           9/11/2021  8:05 PM          20952 api-ms-win-core-datetime-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-debug-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-errorhandling-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-fibers-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          25048 api-ms-win-core-file-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-file-l1-2-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-file-l2-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-handle-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-heap-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-interlocked-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-libraryloader-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-localization-l1-2-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-memory-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-namedpipe-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-processenvironment-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-processthreads-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-processthreads-l1-1-1.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-profile-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-rtlsupport-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-string-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-synch-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-synch-l1-2-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-sysinfo-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-timezone-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-util-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-conio-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          25056 api-ms-win-crt-convert-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-environment-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-filesystem-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-heap-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-locale-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          29144 api-ms-win-crt-math-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          29136 api-ms-win-crt-multibyte-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          74192 api-ms-win-crt-private-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-process-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          25040 api-ms-win-crt-runtime-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          25040 api-ms-win-crt-stdio-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          25040 api-ms-win-crt-string-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-time-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-utility-l1-1-0.dll
+-a---            7/8/2023  1:57 AM        1825952 AWSSDK.Core.dll
+-a---            7/8/2023  1:57 AM         126624 AWSSDK.SecretsManager.dll
+-a---            7/8/2023  1:57 AM          87200 AWSSDK.SecurityToken.dll
+-a---            7/8/2023  1:57 AM        1122976 AWSSDK.SimpleSystemsManagement.dll
+-a---           6/30/2022  7:28 PM         321424 Azure.Core.dll
+-a---           9/19/2022  8:31 PM         306064 Azure.Identity.dll
+-a---            2/8/2021 10:59 AM          26624 BoDi.dll
+-a---          12/30/2022  9:16 AM         385024 Castle.Core.dll
+-a---          10/23/2022  5:46 PM         304768 clretwrc.dll
+-a---          10/23/2022  5:41 PM        1436288 clrjit.dll
+-a---           9/21/2021  9:56 AM          35720 codecoveragemessages.dll
+-a---          10/23/2022  5:49 PM        5126272 coreclr.dll
+-a---          10/29/2022  3:06 PM          46499 coverlet.collector.deps.json
+-a---          10/29/2022  3:10 PM          45624 coverlet.collector.dll
+-a---          10/29/2022  3:06 PM          19196 coverlet.collector.pdb
+-a---          10/29/2022  3:10 PM         143928 coverlet.core.dll
+-a---          10/29/2022  3:06 PM          53320 coverlet.core.pdb
+-a---           9/21/2021  9:57 AM         759176 covrun32.dll
+-a---           9/21/2021  9:57 AM         977800 covrun64.dll
+-a---           9/22/2022  8:36 AM         963472 covrunarm64.dll
+-a---          11/11/2022  7:49 PM         211456 CsvHelper.dll
+-a---          10/23/2022  5:46 PM         140416 dbgshim.dll
+-a---          10/25/2021 11:28 AM         645120 FluentAssertions.dll
+-a---           5/24/2021  3:40 PM         174592 Gherkin.dll
+-a---          10/23/2022  6:18 PM         374912 hostfxr.dll
+-a---          10/23/2022  6:18 PM         392320 hostpolicy.dll
+-a---            2/7/2025  2:33 PM         146360 LatePaymentInterest_test.deps.json
+-a---            2/7/2025  2:33 PM          25600 LatePaymentInterest_test.dll
+-a---            2/7/2025  2:33 PM          21576 LatePaymentInterest_test.pdb
+-a---            2/7/2025  2:33 PM          72048 LatePaymentInterest_XNET_Core_6.deps.json
+-a---            2/7/2025  2:33 PM          89600 LatePaymentInterest_XNET_Core_6.dll
+-a---            2/7/2025  2:33 PM          49384 LatePaymentInterest_XNET_Core_6.pdb
+-a---            9/9/2021 11:08 AM          23040 LivingDoc.Dtos.dll
+-a---            9/9/2021 11:09 AM          21504 LivingDoc.SpecFlowPlugin.dll
+-a---           4/14/2020 10:39 PM          14720 Microsoft.Bcl.AsyncInterfaces.dll
+-a---           9/22/2022  8:35 AM         246160 Microsoft.CodeCoverage.Core.dll
+-a---           9/22/2022  8:35 AM          94624 Microsoft.CodeCoverage.Instrumentation.dll
+-a---           9/22/2022  8:35 AM          92576 Microsoft.CodeCoverage.Interprocess.dll
+-a---          10/23/2022  6:29 PM        1042560 Microsoft.CSharp.dll
+-a---           3/28/2023  5:27 AM        1631712 Microsoft.Data.SqlClient.dll
+-a---           1/12/2023 10:19 PM         506272 Microsoft.Data.SqlClient.SNI.dll
+-a---          12/16/2020 11:57 PM        1813896 Microsoft.DiaSymReader.Native.amd64.dll
+-a---           8/31/2016  8:42 PM          21488 Microsoft.DotNet.PlatformAbstractions.dll
+-a---           8/18/2022  2:36 AM          22416 Microsoft.Extensions.Configuration.Abstractions.dll
+-a---           8/18/2022  2:36 AM          28560 Microsoft.Extensions.Configuration.dll
+-a---           8/18/2022  2:37 AM          23952 Microsoft.Extensions.Configuration.FileExtensions.dll
+-a---           8/18/2022  2:36 AM          22928 Microsoft.Extensions.Configuration.Json.dll
+-a---          10/29/2022  3:10 PM          48184 Microsoft.Extensions.DependencyInjection.Abstractions.dll
+-a---          10/29/2022  3:10 PM          79416 Microsoft.Extensions.DependencyInjection.dll
+-a---           8/31/2016  9:42 PM          58352 Microsoft.Extensions.DependencyModel.dll
+-a---           8/18/2022  2:37 AM          18832 Microsoft.Extensions.FileProviders.Abstractions.dll
+-a---           8/18/2022  2:36 AM          36752 Microsoft.Extensions.FileProviders.Physical.dll
+-a---           8/18/2022  2:38 AM          40352 Microsoft.Extensions.FileSystemGlobbing.dll
+-a---           8/18/2022  2:37 AM          39840 Microsoft.Extensions.Primitives.dll
+-a---           10/3/2022  5:40 PM        1455576 Microsoft.Identity.Client.dll
+-a---          11/19/2021 10:02 PM          62984 Microsoft.Identity.Client.Extensions.Msal.dll
+-a---          10/13/2022  7:42 PM          18864 Microsoft.IdentityModel.Abstractions.dll
+-a---          10/13/2022  7:20 PM          89520 Microsoft.IdentityModel.JsonWebTokens.dll
+-a---          10/13/2022  7:22 PM          34224 Microsoft.IdentityModel.Logging.dll
+-a---          10/13/2022  7:24 PM          38288 Microsoft.IdentityModel.Protocols.dll
+-a---          10/13/2022  7:34 PM         114048 Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+-a---          10/13/2022  7:29 PM         983472 Microsoft.IdentityModel.Tokens.dll
+-a---           1/27/2022  5:19 PM          23976 Microsoft.SqlServer.Server.dll
+-a---           11/7/2022  9:15 AM          34240 Microsoft.TestPlatform.AdapterUtilities.dll
+-a---          12/15/2022  1:48 PM         115600 Microsoft.TestPlatform.CommunicationUtilities.dll
+-a---          12/15/2022  1:48 PM          16320 Microsoft.TestPlatform.CommunicationUtilities.resources.dll
+-a---          12/15/2022  1:42 PM          80320 Microsoft.TestPlatform.CoreUtilities.dll
+-a---          12/15/2022  1:42 PM          16800 Microsoft.TestPlatform.CoreUtilities.resources.dll
+-a---          12/15/2022  1:48 PM         258448 Microsoft.TestPlatform.CrossPlatEngine.dll
+-a---          12/15/2022  1:48 PM          20408 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+-a---          12/15/2022  1:42 PM          39328 Microsoft.TestPlatform.PlatformAbstractions.dll
+-a---          12/15/2022  1:47 PM          56256 Microsoft.TestPlatform.Utilities.dll
+-a---          10/23/2022  6:29 PM        1245312 Microsoft.VisualBasic.Core.dll
+-a---          10/23/2022  5:52 PM          18088 Microsoft.VisualBasic.dll
+-a---           9/21/2021  9:56 AM          16264 Microsoft.VisualStudio.CodeCoverage.Shim.dll
+-a---           9/21/2021  9:56 AM         164744 Microsoft.VisualStudio.Coverage.Core.dll
+-a---           9/21/2021  9:56 AM          76664 Microsoft.VisualStudio.Coverage.Instrumentation.dll
+-a---           9/21/2021  9:56 AM          62344 Microsoft.VisualStudio.Coverage.Interprocess.dll
+-a---          12/15/2022  1:48 PM         207768 Microsoft.VisualStudio.TestPlatform.Common.dll
+-a---          12/15/2022  1:47 PM          19904 Microsoft.VisualStudio.TestPlatform.Common.resources.dll
+-a---          12/20/2022  1:08 PM         163776 Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+-a---          12/20/2022  1:05 PM          67520 Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dl
+                                                  l
+-a---          12/15/2022  1:42 PM         187296 Microsoft.VisualStudio.TestPlatform.ObjectModel.dll
+-a---          12/15/2022  1:42 PM          22976 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll
+-a---          12/20/2022 12:41 PM          78736 Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+-a---          12/20/2022 12:47 PM          20376 Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+-a---          12/20/2022 12:40 PM          21904 Microsoft.VisualStudio.TestPlatform.TestFramework.resources.dll
+-a---           9/21/2021  9:56 AM          70536 Microsoft.VisualStudio.TraceDataCollector.dll
+-a---           9/21/2021  9:56 AM          20872 Microsoft.VisualStudio.TraceDataCollector.resources.dll
+-a---          10/23/2022  6:30 PM          26240 Microsoft.Win32.Primitives.dll
+-a---          10/23/2022  6:30 PM          87680 Microsoft.Win32.Registry.dll
+-a---          10/22/2021 11:40 PM          53352 Microsoft.Win32.SystemEvents.dll
+-a---           3/22/2022  8:24 PM        1454992 MicrosoftInstrumentationEngine_arm64.dll
+-a---           7/27/2021  9:57 PM        1425784 MicrosoftInstrumentationEngine_x64.dll
+-a---           7/27/2021  9:57 PM        1328008 MicrosoftInstrumentationEngine_x86.dll
+-a---           9/15/2020 11:31 PM         364952 Mono.Cecil.dll
+-a---          10/29/2022  3:10 PM          49720 Mono.Cecil.Mdb.dll
+-a---           9/15/2020 11:31 PM          98200 Mono.Cecil.Pdb.dll
+-a---          10/29/2022  3:10 PM          34872 Mono.Cecil.Rocks.dll
+-a---            9/7/2024  1:36 AM         312320 Moq.dll
+-a---          10/23/2022  5:54 PM        1321856 mscordaccore_amd64_amd64_6.0.1122.52304.dll
+-a---          10/23/2022  5:54 PM        1321856 mscordaccore.dll
+-a---          10/23/2022  5:54 PM        1268608 mscordbi.dll
+-a---          10/23/2022  5:52 PM          58544 mscorlib.dll
+-a---          10/23/2022  5:46 PM         147072 mscorrc.dll
+-a---           8/24/2022 12:48 AM        3602768 msdia140.dll
+-a---          10/23/2022  5:52 PM         499584 msquic.dll
+-a---           8/28/2021  8:26 AM        1411464 msvcdis140.dll
+-a---           8/28/2021  8:25 AM          56208 msvcp140_atomic_wait.dll
+-a---           8/28/2021  8:25 AM         567696 msvcp140.dll
+-a---          10/23/2022  5:52 PM         101544 netstandard.dll
+-a---            3/8/2023  7:09 AM         712464 Newtonsoft.Json.dll
+-a---            6/1/2021  8:46 PM         108920 NuGet.Frameworks.dll
+-a---           6/11/2021  9:11 AM          18432 SpecFlow.Internal.Json.dll
+-a---            2/7/2025  2:33 PM         162691 SpecFlowLpi.deps.json
+-a---            2/7/2025  2:33 PM          10752 SpecFlowLpi.dll
+-a---            2/7/2025  2:33 PM          15180 SpecFlowLpi.pdb
+-a---          10/23/2022  5:52 PM          15528 System.AppContext.dll
+-a---          10/23/2022  5:52 PM          15488 System.Buffers.dll
+-a---          10/23/2022  6:30 PM         246912 System.Collections.Concurrent.dll
+-a---          10/23/2022  6:30 PM         264832 System.Collections.dll
+-a---          10/23/2022  6:30 PM         666240 System.Collections.Immutable.dll
+-a---          10/23/2022  6:30 PM         100992 System.Collections.NonGeneric.dll
+-a---          10/23/2022  6:30 PM          95360 System.Collections.Specialized.dll
+-a---          10/23/2022  6:30 PM         187008 System.ComponentModel.Annotations.dll
+-a---          10/23/2022  5:52 PM          17576 System.ComponentModel.DataAnnotations.dll
+-a---          10/23/2022  6:30 PM          18560 System.ComponentModel.dll
+-a---          10/23/2022  6:30 PM          38528 System.ComponentModel.EventBasedAsync.dll
+-a---          10/23/2022  6:30 PM          75392 System.ComponentModel.Primitives.dll
+-a---          10/23/2022  6:30 PM         744576 System.ComponentModel.TypeConverter.dll
+-a---           8/19/2022  7:58 PM         396424 System.Configuration.ConfigurationManager.dll
+-a---          10/23/2022  5:52 PM          19632 System.Configuration.dll
+-a---          10/23/2022  6:30 PM         156800 System.Console.dll
+-a---          10/23/2022  5:52 PM          24232 System.Core.dll
+-a---          10/23/2022  6:30 PM        2983552 System.Data.Common.dll
+-a---          10/23/2022  5:52 PM          16048 System.Data.DataSetExtensions.dll
+-a---          10/23/2022  5:52 PM          25768 System.Data.dll
+-a---          10/23/2022  5:52 PM          16048 System.Diagnostics.Contracts.dll
+-a---          10/23/2022  5:52 PM          16040 System.Diagnostics.Debug.dll
+-a---          10/23/2022  6:30 PM         380544 System.Diagnostics.DiagnosticSource.dll
+-a---          10/22/2021 11:47 PM         132200 System.Diagnostics.EventLog.dll
+-a---          10/22/2021 11:47 PM         799856 System.Diagnostics.EventLog.Messages.dll
+-a---          10/23/2022  6:30 PM          35472 System.Diagnostics.FileVersionInfo.dll
+-a---          10/23/2022  6:30 PM         290480 System.Diagnostics.Process.dll
+-a---          10/23/2022  6:31 PM          36488 System.Diagnostics.StackTrace.dll
+-a---          10/23/2022  6:31 PM          60592 System.Diagnostics.TextWriterTraceListener.dll
+-a---          10/23/2022  5:52 PM          16048 System.Diagnostics.Tools.dll
+-a---          10/23/2022  6:31 PM         133296 System.Diagnostics.TraceSource.dll
+-a---          10/23/2022  5:52 PM          16560 System.Diagnostics.Tracing.dll
+-a---          10/23/2022  5:52 PM          50864 System.dll
+-a---          10/22/2021 11:48 PM         454248 System.Drawing.Common.dll
+-a---          10/23/2022  5:52 PM          21168 System.Drawing.dll
+-a---          10/23/2022  6:31 PM         130224 System.Drawing.Primitives.dll
+-a---          10/23/2022  5:52 PM          16560 System.Dynamic.Runtime.dll
+-a---          10/23/2022  6:31 PM         197288 System.Formats.Asn1.dll
+-a---          10/23/2022  5:52 PM          16040 System.Globalization.Calendars.dll
+-a---          10/23/2022  5:52 PM          16048 System.Globalization.dll
+-a---          10/23/2022  5:52 PM          15536 System.Globalization.Extensions.dll
+-a---          10/13/2022  7:18 PM          90504 System.IdentityModel.Tokens.Jwt.dll
+-a---          10/23/2022  6:31 PM          72880 System.IO.Compression.Brotli.dll
+-a---          10/23/2022  6:31 PM         266928 System.IO.Compression.dll
+-a---          10/23/2022  5:52 PM          16040 System.IO.Compression.FileSystem.dll
+-a---          10/23/2022  5:52 PM         822952 System.IO.Compression.Native.dll
+-a---          10/23/2022  6:31 PM          39568 System.IO.Compression.ZipFile.dll
+-a---          10/23/2022  5:52 PM          16040 System.IO.dll
+-a---          10/23/2022  6:31 PM          93872 System.IO.FileSystem.AccessControl.dll
+-a---          10/23/2022  5:52 PM          24232 System.IO.FileSystem.dll
+-a---          10/23/2022  6:31 PM          42672 System.IO.FileSystem.DriveInfo.dll
+-a---          10/23/2022  5:52 PM          15528 System.IO.FileSystem.Primitives.dll
+-a---          10/23/2022  6:31 PM          72360 System.IO.FileSystem.Watcher.dll
+-a---          10/23/2022  6:31 PM          83624 System.IO.IsolatedStorage.dll
+-a---          10/23/2022  6:31 PM          69264 System.IO.MemoryMappedFiles.dll
+-a---          10/23/2022  5:52 PM          16560 System.IO.Pipes.AccessControl.dll
+-a---          10/23/2022  6:31 PM         136368 System.IO.Pipes.dll
+-a---          10/23/2022  5:52 PM          15536 System.IO.UnmanagedMemoryStream.dll
+-a---          10/23/2022  6:31 PM         538288 System.Linq.dll
+-a---          10/23/2022  6:31 PM        3857072 System.Linq.Expressions.dll
+-a---          10/23/2022  6:31 PM         848552 System.Linq.Parallel.dll
+-a---          10/23/2022  6:32 PM         228528 System.Linq.Queryable.dll
+-a---            4/8/2021  4:45 PM          21368 System.Memory.Data.dll
+-a---          10/23/2022  6:32 PM         173744 System.Memory.dll
+-a---          10/23/2022  5:52 PM          18088 System.Net.dll
+-a---          10/23/2022  6:32 PM        1803440 System.Net.Http.dll
+-a---          10/23/2022  6:32 PM          82096 System.Net.Http.Json.dll
+-a---          10/23/2022  6:32 PM         639144 System.Net.HttpListener.dll
+-a---          10/23/2022  6:32 PM         551600 System.Net.Mail.dll
+-a---          10/23/2022  6:32 PM         101032 System.Net.NameResolution.dll
+-a---          10/23/2022  6:32 PM         150696 System.Net.NetworkInformation.dll
+-a---          10/23/2022  6:32 PM          79024 System.Net.Ping.dll
+-a---          10/23/2022  6:32 PM         214192 System.Net.Primitives.dll
+-a---          10/23/2022  6:32 PM         292016 System.Net.Quic.dll
+-a---          10/23/2022  6:32 PM         348848 System.Net.Requests.dll
+-a---          10/23/2022  6:32 PM         682160 System.Net.Security.dll
+-a---          10/23/2022  6:32 PM          37040 System.Net.ServicePoint.dll
+-a---          10/23/2022  6:32 PM         506544 System.Net.Sockets.dll
+-a---          10/23/2022  6:32 PM         166568 System.Net.WebClient.dll
+-a---          10/23/2022  6:32 PM          60584 System.Net.WebHeaderCollection.dll
+-a---          10/23/2022  6:33 PM          31912 System.Net.WebProxy.dll
+-a---          10/23/2022  6:33 PM          75952 System.Net.WebSockets.Client.dll
+-a---          10/23/2022  6:33 PM         181928 System.Net.WebSockets.dll
+-a---          10/23/2022  5:52 PM          16040 System.Numerics.dll
+-a---          10/23/2022  5:52 PM          16040 System.Numerics.Vectors.dll
+-a---          10/23/2022  6:33 PM          91312 System.ObjectModel.dll
+-a---          10/23/2022  5:53 PM       10630312 System.Private.CoreLib.dll
+-a---          10/23/2022  6:33 PM        2074280 System.Private.DataContractSerialization.dll
+-a---          10/23/2022  6:33 PM         252584 System.Private.Uri.dll
+-a---          10/23/2022  6:33 PM        8505512 System.Private.Xml.dll
+-a---          10/23/2022  6:33 PM         405160 System.Private.Xml.Linq.dll
+-a---          10/23/2022  6:33 PM          66216 System.Reflection.DispatchProxy.dll
+-a---          10/23/2022  5:52 PM          16560 System.Reflection.dll
+-a---          10/23/2022  5:52 PM          16048 System.Reflection.Emit.dll
+-a---          10/23/2022  5:52 PM          16040 System.Reflection.Emit.ILGeneration.dll
+-a---          10/23/2022  5:52 PM          16040 System.Reflection.Emit.Lightweight.dll
+-a---          10/23/2022  5:52 PM          15528 System.Reflection.Extensions.dll
+-a---          10/23/2022  6:33 PM        1130664 System.Reflection.Metadata.dll
+-a---          10/23/2022  5:52 PM          16040 System.Reflection.Primitives.dll
+-a---          10/23/2022  6:33 PM          33456 System.Reflection.TypeExtensions.dll
+-a---          10/23/2022  5:52 PM          15528 System.Resources.Reader.dll
+-a---          10/23/2022  5:52 PM          16040 System.Resources.ResourceManager.dll
+-a---          10/23/2022  6:33 PM          45224 System.Resources.Writer.dll
+-a---          10/22/2021 11:52 PM          91240 System.Runtime.Caching.dll
+-a---          10/23/2022  6:33 PM          22704 System.Runtime.CompilerServices.Unsafe.dll
+-a---          10/23/2022  6:33 PM          20136 System.Runtime.CompilerServices.VisualC.dll
+-a---          10/23/2022  5:52 PM          42664 System.Runtime.dll
+-a---          10/23/2022  5:52 PM          18088 System.Runtime.Extensions.dll
+-a---          10/23/2022  5:52 PM          15536 System.Runtime.Handles.dll
+-a---          10/23/2022  6:33 PM          51880 System.Runtime.InteropServices.dll
+-a---          10/23/2022  6:33 PM          31912 System.Runtime.InteropServices.RuntimeInformation.dll
+-a---          10/23/2022  5:52 PM          16552 System.Runtime.Intrinsics.dll
+-a---          10/23/2022  5:52 PM          16040 System.Runtime.Loader.dll
+-a---          10/23/2022  6:34 PM         221864 System.Runtime.Numerics.dll
+-a---          10/23/2022  5:52 PM          17576 System.Runtime.Serialization.dll
+-a---          10/23/2022  6:34 PM         322216 System.Runtime.Serialization.Formatters.dll
+-a---          10/23/2022  5:52 PM          16040 System.Runtime.Serialization.Json.dll
+-a---          10/23/2022  6:34 PM          28848 System.Runtime.Serialization.Primitives.dll
+-a---          10/23/2022  5:52 PM          16552 System.Runtime.Serialization.Xml.dll
+-a---          10/23/2022  6:34 PM         215208 System.Security.AccessControl.dll
+-a---          10/23/2022  6:34 PM          94376 System.Security.Claims.dll
+-a---          10/23/2022  6:34 PM         805032 System.Security.Cryptography.Algorithms.dll
+-a---          10/23/2022  6:34 PM         485544 System.Security.Cryptography.Cng.dll
+-a---          10/23/2022  6:34 PM         189608 System.Security.Cryptography.Csp.dll
+-a---          10/23/2022  6:34 PM          93864 System.Security.Cryptography.Encoding.dll
+-a---          10/23/2022  6:34 PM          31912 System.Security.Cryptography.OpenSsl.dll
+-a---          10/23/2022  6:34 PM         134824 System.Security.Cryptography.Primitives.dll
+-a---          10/22/2021 11:51 PM          33904 System.Security.Cryptography.ProtectedData.dll
+-a---          10/23/2022  6:34 PM         486568 System.Security.Cryptography.X509Certificates.dll
+-a---          10/23/2022  5:52 PM          18600 System.Security.dll
+-a---          10/22/2021 11:49 PM         104048 System.Security.Permissions.dll
+-a---          10/23/2022  5:52 PM          15528 System.Security.Principal.dll
+-a---          10/23/2022  6:34 PM         151720 System.Security.Principal.Windows.dll
+-a---          10/23/2022  5:52 PM          15536 System.Security.SecureString.dll
+-a---          10/23/2022  5:52 PM          17576 System.ServiceModel.Web.dll
+-a---          10/23/2022  5:52 PM          16552 System.ServiceProcess.dll
+-a---          10/23/2022  6:34 PM         871080 System.Text.Encoding.CodePages.dll
+-a---          10/23/2022  5:52 PM          16040 System.Text.Encoding.dll
+-a---          10/23/2022  5:52 PM          16040 System.Text.Encoding.Extensions.dll
+-a---          10/23/2022  6:34 PM         131240 System.Text.Encodings.Web.dll
+-a---          10/23/2022  6:34 PM        1483944 System.Text.Json.dll
+-a---          10/23/2022  6:34 PM         530096 System.Text.RegularExpressions.dll
+-a---          10/23/2022  6:34 PM         125104 System.Threading.Channels.dll
+-a---          10/23/2022  6:35 PM          80040 System.Threading.dll
+-a---          10/23/2022  5:52 PM          16040 System.Threading.Overlapped.dll
+-a---          10/23/2022  6:35 PM         505512 System.Threading.Tasks.Dataflow.dll
+-a---          10/23/2022  5:52 PM          17064 System.Threading.Tasks.dll
+-a---          10/23/2022  5:52 PM          16016 System.Threading.Tasks.Extensions.dll
+-a---          10/23/2022  6:35 PM         138920 System.Threading.Tasks.Parallel.dll
+-a---          10/23/2022  5:52 PM          16040 System.Threading.Thread.dll
+-a---          10/23/2022  5:52 PM          16040 System.Threading.ThreadPool.dll
+-a---          10/23/2022  5:52 PM          15528 System.Threading.Timer.dll
+-a---          10/23/2022  5:52 PM          17072 System.Transactions.dll
+-a---          10/23/2022  6:35 PM         351400 System.Transactions.Local.dll
+-a---          10/23/2022  5:52 PM          15536 System.ValueTuple.dll
+-a---          10/23/2022  5:52 PM          16040 System.Web.dll
+-a---          10/23/2022  6:35 PM          52912 System.Web.HttpUtility.dll
+-a---          10/23/2022  5:52 PM          16552 System.Windows.dll
+-a---          10/22/2021 11:49 PM          43112 System.Windows.Extensions.dll
+-a---          10/23/2022  5:52 PM          24752 System.Xml.dll
+-a---          10/23/2022  5:52 PM          16560 System.Xml.Linq.dll
+-a---          10/23/2022  5:52 PM          22184 System.Xml.ReaderWriter.dll
+-a---          10/23/2022  5:52 PM          16560 System.Xml.Serialization.dll
+-a---          10/23/2022  5:52 PM          16048 System.Xml.XDocument.dll
+-a---          10/23/2022  5:52 PM          16040 System.Xml.XmlDocument.dll
+-a---          10/23/2022  5:52 PM          18088 System.Xml.XmlSerializer.dll
+-a---          10/23/2022  5:52 PM          16040 System.Xml.XPath.dll
+-a---          10/23/2022  6:35 PM          18064 System.Xml.XPath.XDocument.dll
+-a---            5/2/2022  7:42 AM         298496 TechTalk.SpecFlow.dll
+-a---          11/10/2021  1:28 PM          17408 TechTalk.SpecFlow.xUnit.SpecFlowPlugin.dll
+-a---          12/15/2022  1:47 PM          35264 testhost.dll
+-a---           1/16/2024  2:32 PM           9216 Trizetto.Facets.Core.Extension.Interfaces.dll
+-a---           9/11/2021  8:05 PM        1122768 ucrtbase.dll
+-a---          10/30/2017 10:29 PM          15872 Validation.dll
+-a---           8/28/2021  8:24 AM          37264 vcruntime140_1.dll
+-a---           8/28/2021  8:24 AM          97168 vcruntime140.dll
+-a---          10/23/2022  5:52 PM          17064 WindowsBase.dll
+-a---           8/25/2018  7:54 PM          21928 xunit.abstractions.dll
+-a---          10/29/2018  4:16 AM          73128 xunit.assert.dll
+-a---          10/29/2018  4:16 AM          55208 xunit.core.dll
+-a---          10/29/2018  4:17 AM         248232 xunit.execution.dotnet.dll
+-a---          10/29/2018  4:17 AM          72616 xunit.runner.reporters.netcoreapp10.dll
+-a---          10/29/2018  4:17 AM         221096 xunit.runner.utility.netcoreapp10.dll
+-a---            8/3/2020  1:58 PM         157624 xunit.runner.visualstudio.dotnetcore.testadapter.dll
+-a---           10/3/2018  5:30 PM          16384 Xunit.SkippableFact.dll
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.1.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.1.0.1.2-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.1.2.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.1.3.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.1.4.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.1.4.0.2-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.1.4.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.1.5.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.1.6.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.0.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.0.2.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.0.3.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.0.4.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.0.5.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.1.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.1.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.1.2.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.1.3.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.1.4.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.1.5.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.1.6.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.1.7.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.2.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.2.3.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.3.0.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.3.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.4.0.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.4.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.4.0.2.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.4.0.3.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.4.0.4.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.4.0.5.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.5.0.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.5.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.5.0.2.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentInterest_XNET_Core_6.5.0.3.1-gbs-fcts-lpi-calc.nupkg
+Downloading https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/gbs-fcts-lpi-calc/LatePaymentInterest_XNET_Core_6.5.0.3.1-gbs-fcts-lpi-calc.nupkg...
+
+    Directory: 
+C:\jenkins\agent\workspace\orchestrators-folders\fcts-extensions\image-builds\gbs-facets-fajob\build\nupkg
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            2/7/2025  3:53 PM                LPI
+
+    Directory: C:\jenkins\agent\workspace\orchestrators-folders\fcts-extensions\image-builds\gbs-facets-fajob\build\bin
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            2/7/2025  3:53 PM                LPI
+
+    Directory: 
+C:\jenkins\agent\workspace\orchestrators-folders\fcts-extensions\image-builds\gbs-facets-fajob\build\bin\LPI
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-console-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-console-l1-2-0.dll
+-a---           9/11/2021  8:05 PM          20952 api-ms-win-core-datetime-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-debug-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-errorhandling-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-fibers-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          25048 api-ms-win-core-file-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-file-l1-2-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-file-l2-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-handle-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-heap-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-interlocked-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-libraryloader-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-localization-l1-2-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-memory-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-namedpipe-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-processenvironment-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-processthreads-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-processthreads-l1-1-1.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-profile-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-rtlsupport-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20960 api-ms-win-core-string-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-synch-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-synch-l1-2-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-sysinfo-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-timezone-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-core-util-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-conio-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          25056 api-ms-win-crt-convert-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-environment-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-filesystem-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-heap-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-locale-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          29144 api-ms-win-crt-math-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          29136 api-ms-win-crt-multibyte-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          74192 api-ms-win-crt-private-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-process-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          25040 api-ms-win-crt-runtime-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          25040 api-ms-win-crt-stdio-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          25040 api-ms-win-crt-string-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-time-l1-1-0.dll
+-a---           9/11/2021  8:05 PM          20944 api-ms-win-crt-utility-l1-1-0.dll
+-a---            7/8/2023  1:57 AM        1825952 AWSSDK.Core.dll
+-a---            7/8/2023  1:57 AM         126624 AWSSDK.SecretsManager.dll
+-a---            7/8/2023  1:57 AM          87200 AWSSDK.SecurityToken.dll
+-a---            7/8/2023  1:57 AM        1122976 AWSSDK.SimpleSystemsManagement.dll
+-a---           6/30/2022  7:28 PM         321424 Azure.Core.dll
+-a---           9/19/2022  8:31 PM         306064 Azure.Identity.dll
+-a---            2/8/2021 10:59 AM          26624 BoDi.dll
+-a---          12/30/2022  9:16 AM         385024 Castle.Core.dll
+-a---          10/23/2022  5:46 PM         304768 clretwrc.dll
+-a---          10/23/2022  5:41 PM        1436288 clrjit.dll
+-a---           9/21/2021  9:56 AM          35720 codecoveragemessages.dll
+-a---          10/23/2022  5:49 PM        5126272 coreclr.dll
+-a---          10/29/2022  3:06 PM          46499 coverlet.collector.deps.json
+-a---          10/29/2022  3:10 PM          45624 coverlet.collector.dll
+-a---          10/29/2022  3:06 PM          19196 coverlet.collector.pdb
+-a---          10/29/2022  3:10 PM         143928 coverlet.core.dll
+-a---          10/29/2022  3:06 PM          53320 coverlet.core.pdb
+-a---           9/21/2021  9:57 AM         759176 covrun32.dll
+-a---           9/21/2021  9:57 AM         977800 covrun64.dll
+-a---           9/22/2022  8:36 AM         963472 covrunarm64.dll
+-a---          11/11/2022  7:49 PM         211456 CsvHelper.dll
+-a---          10/23/2022  5:46 PM         140416 dbgshim.dll
+-a---          10/25/2021 11:28 AM         645120 FluentAssertions.dll
+-a---           5/24/2021  3:40 PM         174592 Gherkin.dll
+-a---          10/23/2022  6:18 PM         374912 hostfxr.dll
+-a---          10/23/2022  6:18 PM         392320 hostpolicy.dll
+-a---            2/7/2025  2:33 PM         146360 LatePaymentInterest_test.deps.json
+-a---            2/7/2025  2:33 PM          25600 LatePaymentInterest_test.dll
+-a---            2/7/2025  2:33 PM          21576 LatePaymentInterest_test.pdb
+-a---            2/7/2025  2:33 PM          72048 LatePaymentInterest_XNET_Core_6.deps.json
+-a---            2/7/2025  2:33 PM          90112 LatePaymentInterest_XNET_Core_6.dll
+-a---            2/7/2025  2:33 PM          49384 LatePaymentInterest_XNET_Core_6.pdb
+-a---            9/9/2021 11:08 AM          23040 LivingDoc.Dtos.dll
+-a---            9/9/2021 11:09 AM          21504 LivingDoc.SpecFlowPlugin.dll
+-a---           4/14/2020 10:39 PM          14720 Microsoft.Bcl.AsyncInterfaces.dll
+-a---           9/22/2022  8:35 AM         246160 Microsoft.CodeCoverage.Core.dll
+-a---           9/22/2022  8:35 AM          94624 Microsoft.CodeCoverage.Instrumentation.dll
+-a---           9/22/2022  8:35 AM          92576 Microsoft.CodeCoverage.Interprocess.dll
+-a---          10/23/2022  6:29 PM        1042560 Microsoft.CSharp.dll
+-a---           3/28/2023  5:27 AM        1631712 Microsoft.Data.SqlClient.dll
+-a---           1/12/2023 10:19 PM         506272 Microsoft.Data.SqlClient.SNI.dll
+-a---          12/16/2020 11:57 PM        1813896 Microsoft.DiaSymReader.Native.amd64.dll
+-a---           8/31/2016  8:42 PM          21488 Microsoft.DotNet.PlatformAbstractions.dll
+-a---           8/18/2022  2:36 AM          22416 Microsoft.Extensions.Configuration.Abstractions.dll
+-a---           8/18/2022  2:36 AM          28560 Microsoft.Extensions.Configuration.dll
+-a---           8/18/2022  2:37 AM          23952 Microsoft.Extensions.Configuration.FileExtensions.dll
+-a---           8/18/2022  2:36 AM          22928 Microsoft.Extensions.Configuration.Json.dll
+-a---          10/29/2022  3:10 PM          48184 Microsoft.Extensions.DependencyInjection.Abstractions.dll
+-a---          10/29/2022  3:10 PM          79416 Microsoft.Extensions.DependencyInjection.dll
+-a---           8/31/2016  9:42 PM          58352 Microsoft.Extensions.DependencyModel.dll
+-a---           8/18/2022  2:37 AM          18832 Microsoft.Extensions.FileProviders.Abstractions.dll
+-a---           8/18/2022  2:36 AM          36752 Microsoft.Extensions.FileProviders.Physical.dll
+-a---           8/18/2022  2:38 AM          40352 Microsoft.Extensions.FileSystemGlobbing.dll
+-a---           8/18/2022  2:37 AM          39840 Microsoft.Extensions.Primitives.dll
+-a---           10/3/2022  5:40 PM        1455576 Microsoft.Identity.Client.dll
+-a---          11/19/2021 10:02 PM          62984 Microsoft.Identity.Client.Extensions.Msal.dll
+-a---          10/13/2022  7:42 PM          18864 Microsoft.IdentityModel.Abstractions.dll
+-a---          10/13/2022  7:20 PM          89520 Microsoft.IdentityModel.JsonWebTokens.dll
+-a---          10/13/2022  7:22 PM          34224 Microsoft.IdentityModel.Logging.dll
+-a---          10/13/2022  7:24 PM          38288 Microsoft.IdentityModel.Protocols.dll
+-a---          10/13/2022  7:34 PM         114048 Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+-a---          10/13/2022  7:29 PM         983472 Microsoft.IdentityModel.Tokens.dll
+-a---           1/27/2022  5:19 PM          23976 Microsoft.SqlServer.Server.dll
+-a---           11/7/2022  9:15 AM          34240 Microsoft.TestPlatform.AdapterUtilities.dll
+-a---          12/15/2022  1:48 PM         115600 Microsoft.TestPlatform.CommunicationUtilities.dll
+-a---          12/15/2022  1:48 PM          16320 Microsoft.TestPlatform.CommunicationUtilities.resources.dll
+-a---          12/15/2022  1:42 PM          80320 Microsoft.TestPlatform.CoreUtilities.dll
+-a---          12/15/2022  1:42 PM          16800 Microsoft.TestPlatform.CoreUtilities.resources.dll
+-a---          12/15/2022  1:48 PM         258448 Microsoft.TestPlatform.CrossPlatEngine.dll
+-a---          12/15/2022  1:48 PM          20408 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+-a---          12/15/2022  1:42 PM          39328 Microsoft.TestPlatform.PlatformAbstractions.dll
+-a---          12/15/2022  1:47 PM          56256 Microsoft.TestPlatform.Utilities.dll
+-a---          10/23/2022  6:29 PM        1245312 Microsoft.VisualBasic.Core.dll
+-a---          10/23/2022  5:52 PM          18088 Microsoft.VisualBasic.dll
+-a---           9/21/2021  9:56 AM          16264 Microsoft.VisualStudio.CodeCoverage.Shim.dll
+-a---           9/21/2021  9:56 AM         164744 Microsoft.VisualStudio.Coverage.Core.dll
+-a---           9/21/2021  9:56 AM          76664 Microsoft.VisualStudio.Coverage.Instrumentation.dll
+-a---           9/21/2021  9:56 AM          62344 Microsoft.VisualStudio.Coverage.Interprocess.dll
+-a---          12/15/2022  1:48 PM         207768 Microsoft.VisualStudio.TestPlatform.Common.dll
+-a---          12/15/2022  1:47 PM          19904 Microsoft.VisualStudio.TestPlatform.Common.resources.dll
+-a---          12/20/2022  1:08 PM         163776 Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+-a---          12/20/2022  1:05 PM          67520 Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dl
+                                                  l
+-a---          12/15/2022  1:42 PM         187296 Microsoft.VisualStudio.TestPlatform.ObjectModel.dll
+-a---          12/15/2022  1:42 PM          22976 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll
+-a---          12/20/2022 12:41 PM          78736 Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+-a---          12/20/2022 12:47 PM          20376 Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+-a---          12/20/2022 12:40 PM          21904 Microsoft.VisualStudio.TestPlatform.TestFramework.resources.dll
+-a---           9/21/2021  9:56 AM          70536 Microsoft.VisualStudio.TraceDataCollector.dll
+-a---           9/21/2021  9:56 AM          20872 Microsoft.VisualStudio.TraceDataCollector.resources.dll
+-a---          10/23/2022  6:30 PM          26240 Microsoft.Win32.Primitives.dll
+-a---          10/23/2022  6:30 PM          87680 Microsoft.Win32.Registry.dll
+-a---          10/22/2021 11:40 PM          53352 Microsoft.Win32.SystemEvents.dll
+-a---           3/22/2022  8:24 PM        1454992 MicrosoftInstrumentationEngine_arm64.dll
+-a---           7/27/2021  9:57 PM        1425784 MicrosoftInstrumentationEngine_x64.dll
+-a---           7/27/2021  9:57 PM        1328008 MicrosoftInstrumentationEngine_x86.dll
+-a---           9/15/2020 11:31 PM         364952 Mono.Cecil.dll
+-a---          10/29/2022  3:10 PM          49720 Mono.Cecil.Mdb.dll
+-a---           9/15/2020 11:31 PM          98200 Mono.Cecil.Pdb.dll
+-a---          10/29/2022  3:10 PM          34872 Mono.Cecil.Rocks.dll
+-a---            9/7/2024  1:36 AM         312320 Moq.dll
+-a---          10/23/2022  5:54 PM        1321856 mscordaccore_amd64_amd64_6.0.1122.52304.dll
+-a---          10/23/2022  5:54 PM        1321856 mscordaccore.dll
+-a---          10/23/2022  5:54 PM        1268608 mscordbi.dll
+-a---          10/23/2022  5:52 PM          58544 mscorlib.dll
+-a---          10/23/2022  5:46 PM         147072 mscorrc.dll
+-a---           8/24/2022 12:48 AM        3602768 msdia140.dll
+-a---          10/23/2022  5:52 PM         499584 msquic.dll
+-a---           8/28/2021  8:26 AM        1411464 msvcdis140.dll
+-a---           8/28/2021  8:25 AM          56208 msvcp140_atomic_wait.dll
+-a---           8/28/2021  8:25 AM         567696 msvcp140.dll
+-a---          10/23/2022  5:52 PM         101544 netstandard.dll
+-a---            3/8/2023  7:09 AM         712464 Newtonsoft.Json.dll
+-a---            6/1/2021  8:46 PM         108920 NuGet.Frameworks.dll
+-a---           6/11/2021  9:11 AM          18432 SpecFlow.Internal.Json.dll
+-a---            2/7/2025  2:33 PM         162691 SpecFlowLpi.deps.json
+-a---            2/7/2025  2:33 PM          10752 SpecFlowLpi.dll
+-a---            2/7/2025  2:33 PM          15180 SpecFlowLpi.pdb
+-a---          10/23/2022  5:52 PM          15528 System.AppContext.dll
+-a---          10/23/2022  5:52 PM          15488 System.Buffers.dll
+-a---          10/23/2022  6:30 PM         246912 System.Collections.Concurrent.dll
+-a---          10/23/2022  6:30 PM         264832 System.Collections.dll
+-a---          10/23/2022  6:30 PM         666240 System.Collections.Immutable.dll
+-a---          10/23/2022  6:30 PM         100992 System.Collections.NonGeneric.dll
+-a---          10/23/2022  6:30 PM          95360 System.Collections.Specialized.dll
+-a---          10/23/2022  6:30 PM         187008 System.ComponentModel.Annotations.dll
+-a---          10/23/2022  5:52 PM          17576 System.ComponentModel.DataAnnotations.dll
+-a---          10/23/2022  6:30 PM          18560 System.ComponentModel.dll
+-a---          10/23/2022  6:30 PM          38528 System.ComponentModel.EventBasedAsync.dll
+-a---          10/23/2022  6:30 PM          75392 System.ComponentModel.Primitives.dll
+-a---          10/23/2022  6:30 PM         744576 System.ComponentModel.TypeConverter.dll
+-a---           8/19/2022  7:58 PM         396424 System.Configuration.ConfigurationManager.dll
+-a---          10/23/2022  5:52 PM          19632 System.Configuration.dll
+-a---          10/23/2022  6:30 PM         156800 System.Console.dll
+-a---          10/23/2022  5:52 PM          24232 System.Core.dll
+-a---          10/23/2022  6:30 PM        2983552 System.Data.Common.dll
+-a---          10/23/2022  5:52 PM          16048 System.Data.DataSetExtensions.dll
+-a---          10/23/2022  5:52 PM          25768 System.Data.dll
+-a---          10/23/2022  5:52 PM          16048 System.Diagnostics.Contracts.dll
+-a---          10/23/2022  5:52 PM          16040 System.Diagnostics.Debug.dll
+-a---          10/23/2022  6:30 PM         380544 System.Diagnostics.DiagnosticSource.dll
+-a---          10/22/2021 11:47 PM         132200 System.Diagnostics.EventLog.dll
+-a---          10/22/2021 11:47 PM         799856 System.Diagnostics.EventLog.Messages.dll
+-a---          10/23/2022  6:30 PM          35472 System.Diagnostics.FileVersionInfo.dll
+-a---          10/23/2022  6:30 PM         290480 System.Diagnostics.Process.dll
+-a---          10/23/2022  6:31 PM          36488 System.Diagnostics.StackTrace.dll
+-a---          10/23/2022  6:31 PM          60592 System.Diagnostics.TextWriterTraceListener.dll
+-a---          10/23/2022  5:52 PM          16048 System.Diagnostics.Tools.dll
+-a---          10/23/2022  6:31 PM         133296 System.Diagnostics.TraceSource.dll
+-a---          10/23/2022  5:52 PM          16560 System.Diagnostics.Tracing.dll
+-a---          10/23/2022  5:52 PM          50864 System.dll
+-a---          10/22/2021 11:48 PM         454248 System.Drawing.Common.dll
+-a---          10/23/2022  5:52 PM          21168 System.Drawing.dll
+-a---          10/23/2022  6:31 PM         130224 System.Drawing.Primitives.dll
+-a---          10/23/2022  5:52 PM          16560 System.Dynamic.Runtime.dll
+-a---          10/23/2022  6:31 PM         197288 System.Formats.Asn1.dll
+-a---          10/23/2022  5:52 PM          16040 System.Globalization.Calendars.dll
+-a---          10/23/2022  5:52 PM          16048 System.Globalization.dll
+-a---          10/23/2022  5:52 PM          15536 System.Globalization.Extensions.dll
+-a---          10/13/2022  7:18 PM          90504 System.IdentityModel.Tokens.Jwt.dll
+-a---          10/23/2022  6:31 PM          72880 System.IO.Compression.Brotli.dll
+-a---          10/23/2022  6:31 PM         266928 System.IO.Compression.dll
+-a---          10/23/2022  5:52 PM          16040 System.IO.Compression.FileSystem.dll
+-a---          10/23/2022  5:52 PM         822952 System.IO.Compression.Native.dll
+-a---          10/23/2022  6:31 PM          39568 System.IO.Compression.ZipFile.dll
+-a---          10/23/2022  5:52 PM          16040 System.IO.dll
+-a---          10/23/2022  6:31 PM          93872 System.IO.FileSystem.AccessControl.dll
+-a---          10/23/2022  5:52 PM          24232 System.IO.FileSystem.dll
+-a---          10/23/2022  6:31 PM          42672 System.IO.FileSystem.DriveInfo.dll
+-a---          10/23/2022  5:52 PM          15528 System.IO.FileSystem.Primitives.dll
+-a---          10/23/2022  6:31 PM          72360 System.IO.FileSystem.Watcher.dll
+-a---          10/23/2022  6:31 PM          83624 System.IO.IsolatedStorage.dll
+-a---          10/23/2022  6:31 PM          69264 System.IO.MemoryMappedFiles.dll
+-a---          10/23/2022  5:52 PM          16560 System.IO.Pipes.AccessControl.dll
+-a---          10/23/2022  6:31 PM         136368 System.IO.Pipes.dll
+-a---          10/23/2022  5:52 PM          15536 System.IO.UnmanagedMemoryStream.dll
+-a---          10/23/2022  6:31 PM         538288 System.Linq.dll
+-a---          10/23/2022  6:31 PM        3857072 System.Linq.Expressions.dll
+-a---          10/23/2022  6:31 PM         848552 System.Linq.Parallel.dll
+-a---          10/23/2022  6:32 PM         228528 System.Linq.Queryable.dll
+-a---            4/8/2021  4:45 PM          21368 System.Memory.Data.dll
+-a---          10/23/2022  6:32 PM         173744 System.Memory.dll
+-a---          10/23/2022  5:52 PM          18088 System.Net.dll
+-a---          10/23/2022  6:32 PM        1803440 System.Net.Http.dll
+-a---          10/23/2022  6:32 PM          82096 System.Net.Http.Json.dll
+-a---          10/23/2022  6:32 PM         639144 System.Net.HttpListener.dll
+-a---          10/23/2022  6:32 PM         551600 System.Net.Mail.dll
+-a---          10/23/2022  6:32 PM         101032 System.Net.NameResolution.dll
+-a---          10/23/2022  6:32 PM         150696 System.Net.NetworkInformation.dll
+-a---          10/23/2022  6:32 PM          79024 System.Net.Ping.dll
+-a---          10/23/2022  6:32 PM         214192 System.Net.Primitives.dll
+-a---          10/23/2022  6:32 PM         292016 System.Net.Quic.dll
+-a---          10/23/2022  6:32 PM         348848 System.Net.Requests.dll
+-a---          10/23/2022  6:32 PM         682160 System.Net.Security.dll
+-a---          10/23/2022  6:32 PM          37040 System.Net.ServicePoint.dll
+-a---          10/23/2022  6:32 PM         506544 System.Net.Sockets.dll
+-a---          10/23/2022  6:32 PM         166568 System.Net.WebClient.dll
+-a---          10/23/2022  6:32 PM          60584 System.Net.WebHeaderCollection.dll
+-a---          10/23/2022  6:33 PM          31912 System.Net.WebProxy.dll
+-a---          10/23/2022  6:33 PM          75952 System.Net.WebSockets.Client.dll
+-a---          10/23/2022  6:33 PM         181928 System.Net.WebSockets.dll
+-a---          10/23/2022  5:52 PM          16040 System.Numerics.dll
+-a---          10/23/2022  5:52 PM          16040 System.Numerics.Vectors.dll
+-a---          10/23/2022  6:33 PM          91312 System.ObjectModel.dll
+-a---          10/23/2022  5:53 PM       10630312 System.Private.CoreLib.dll
+-a---          10/23/2022  6:33 PM        2074280 System.Private.DataContractSerialization.dll
+-a---          10/23/2022  6:33 PM         252584 System.Private.Uri.dll
+-a---          10/23/2022  6:33 PM        8505512 System.Private.Xml.dll
+-a---          10/23/2022  6:33 PM         405160 System.Private.Xml.Linq.dll
+-a---          10/23/2022  6:33 PM          66216 System.Reflection.DispatchProxy.dll
+-a---          10/23/2022  5:52 PM          16560 System.Reflection.dll
+-a---          10/23/2022  5:52 PM          16048 System.Reflection.Emit.dll
+-a---          10/23/2022  5:52 PM          16040 System.Reflection.Emit.ILGeneration.dll
+-a---          10/23/2022  5:52 PM          16040 System.Reflection.Emit.Lightweight.dll
+-a---          10/23/2022  5:52 PM          15528 System.Reflection.Extensions.dll
+-a---          10/23/2022  6:33 PM        1130664 System.Reflection.Metadata.dll
+-a---          10/23/2022  5:52 PM          16040 System.Reflection.Primitives.dll
+-a---          10/23/2022  6:33 PM          33456 System.Reflection.TypeExtensions.dll
+-a---          10/23/2022  5:52 PM          15528 System.Resources.Reader.dll
+-a---          10/23/2022  5:52 PM          16040 System.Resources.ResourceManager.dll
+-a---          10/23/2022  6:33 PM          45224 System.Resources.Writer.dll
+-a---          10/22/2021 11:52 PM          91240 System.Runtime.Caching.dll
+-a---          10/23/2022  6:33 PM          22704 System.Runtime.CompilerServices.Unsafe.dll
+-a---          10/23/2022  6:33 PM          20136 System.Runtime.CompilerServices.VisualC.dll
+-a---          10/23/2022  5:52 PM          42664 System.Runtime.dll
+-a---          10/23/2022  5:52 PM          18088 System.Runtime.Extensions.dll
+-a---          10/23/2022  5:52 PM          15536 System.Runtime.Handles.dll
+-a---          10/23/2022  6:33 PM          51880 System.Runtime.InteropServices.dll
+-a---          10/23/2022  6:33 PM          31912 System.Runtime.InteropServices.RuntimeInformation.dll
+-a---          10/23/2022  5:52 PM          16552 System.Runtime.Intrinsics.dll
+-a---          10/23/2022  5:52 PM          16040 System.Runtime.Loader.dll
+-a---          10/23/2022  6:34 PM         221864 System.Runtime.Numerics.dll
+-a---          10/23/2022  5:52 PM          17576 System.Runtime.Serialization.dll
+-a---          10/23/2022  6:34 PM         322216 System.Runtime.Serialization.Formatters.dll
+-a---          10/23/2022  5:52 PM          16040 System.Runtime.Serialization.Json.dll
+-a---          10/23/2022  6:34 PM          28848 System.Runtime.Serialization.Primitives.dll
+-a---          10/23/2022  5:52 PM          16552 System.Runtime.Serialization.Xml.dll
+-a---          10/23/2022  6:34 PM         215208 System.Security.AccessControl.dll
+-a---          10/23/2022  6:34 PM          94376 System.Security.Claims.dll
+-a---          10/23/2022  6:34 PM         805032 System.Security.Cryptography.Algorithms.dll
+-a---          10/23/2022  6:34 PM         485544 System.Security.Cryptography.Cng.dll
+-a---          10/23/2022  6:34 PM         189608 System.Security.Cryptography.Csp.dll
+-a---          10/23/2022  6:34 PM          93864 System.Security.Cryptography.Encoding.dll
+-a---          10/23/2022  6:34 PM          31912 System.Security.Cryptography.OpenSsl.dll
+-a---          10/23/2022  6:34 PM         134824 System.Security.Cryptography.Primitives.dll
+-a---          10/22/2021 11:51 PM          33904 System.Security.Cryptography.ProtectedData.dll
+-a---          10/23/2022  6:34 PM         486568 System.Security.Cryptography.X509Certificates.dll
+-a---          10/23/2022  5:52 PM          18600 System.Security.dll
+-a---          10/22/2021 11:49 PM         104048 System.Security.Permissions.dll
+-a---          10/23/2022  5:52 PM          15528 System.Security.Principal.dll
+-a---          10/23/2022  6:34 PM         151720 System.Security.Principal.Windows.dll
+-a---          10/23/2022  5:52 PM          15536 System.Security.SecureString.dll
+-a---          10/23/2022  5:52 PM          17576 System.ServiceModel.Web.dll
+-a---          10/23/2022  5:52 PM          16552 System.ServiceProcess.dll
+-a---          10/23/2022  6:34 PM         871080 System.Text.Encoding.CodePages.dll
+-a---          10/23/2022  5:52 PM          16040 System.Text.Encoding.dll
+-a---          10/23/2022  5:52 PM          16040 System.Text.Encoding.Extensions.dll
+-a---          10/23/2022  6:34 PM         131240 System.Text.Encodings.Web.dll
+-a---          10/23/2022  6:34 PM        1483944 System.Text.Json.dll
+-a---          10/23/2022  6:34 PM         530096 System.Text.RegularExpressions.dll
+-a---          10/23/2022  6:34 PM         125104 System.Threading.Channels.dll
+-a---          10/23/2022  6:35 PM          80040 System.Threading.dll
+-a---          10/23/2022  5:52 PM          16040 System.Threading.Overlapped.dll
+-a---          10/23/2022  6:35 PM         505512 System.Threading.Tasks.Dataflow.dll
+-a---          10/23/2022  5:52 PM          17064 System.Threading.Tasks.dll
+-a---          10/23/2022  5:52 PM          16016 System.Threading.Tasks.Extensions.dll
+-a---          10/23/2022  6:35 PM         138920 System.Threading.Tasks.Parallel.dll
+-a---          10/23/2022  5:52 PM          16040 System.Threading.Thread.dll
+-a---          10/23/2022  5:52 PM          16040 System.Threading.ThreadPool.dll
+-a---          10/23/2022  5:52 PM          15528 System.Threading.Timer.dll
+-a---          10/23/2022  5:52 PM          17072 System.Transactions.dll
+-a---          10/23/2022  6:35 PM         351400 System.Transactions.Local.dll
+-a---          10/23/2022  5:52 PM          15536 System.ValueTuple.dll
+-a---          10/23/2022  5:52 PM          16040 System.Web.dll
+-a---          10/23/2022  6:35 PM          52912 System.Web.HttpUtility.dll
+-a---          10/23/2022  5:52 PM          16552 System.Windows.dll
+-a---          10/22/2021 11:49 PM          43112 System.Windows.Extensions.dll
+-a---          10/23/2022  5:52 PM          24752 System.Xml.dll
+-a---          10/23/2022  5:52 PM          16560 System.Xml.Linq.dll
+-a---          10/23/2022  5:52 PM          22184 System.Xml.ReaderWriter.dll
+-a---          10/23/2022  5:52 PM          16560 System.Xml.Serialization.dll
+-a---          10/23/2022  5:52 PM          16048 System.Xml.XDocument.dll
+-a---          10/23/2022  5:52 PM          16040 System.Xml.XmlDocument.dll
+-a---          10/23/2022  5:52 PM          18088 System.Xml.XmlSerializer.dll
+-a---          10/23/2022  5:52 PM          16040 System.Xml.XPath.dll
+-a---          10/23/2022  6:35 PM          18064 System.Xml.XPath.XDocument.dll
+-a---            5/2/2022  7:42 AM         298496 TechTalk.SpecFlow.dll
+-a---          11/10/2021  1:28 PM          17408 TechTalk.SpecFlow.xUnit.SpecFlowPlugin.dll
+-a---          12/15/2022  1:47 PM          35264 testhost.dll
+-a---           1/16/2024  2:32 PM           9216 Trizetto.Facets.Core.Extension.Interfaces.dll
+-a---           9/11/2021  8:05 PM        1122768 ucrtbase.dll
+-a---          10/30/2017 10:29 PM          15872 Validation.dll
+-a---           8/28/2021  8:24 AM          37264 vcruntime140_1.dll
+-a---           8/28/2021  8:24 AM          97168 vcruntime140.dll
+-a---          10/23/2022  5:52 PM          17064 WindowsBase.dll
+-a---           8/25/2018  7:54 PM          21928 xunit.abstractions.dll
+-a---          10/29/2018  4:16 AM          73128 xunit.assert.dll
+-a---          10/29/2018  4:16 AM          55208 xunit.core.dll
+-a---          10/29/2018  4:17 AM         248232 xunit.execution.dotnet.dll
+-a---          10/29/2018  4:17 AM          72616 xunit.runner.reporters.netcoreapp10.dll
+-a---          10/29/2018  4:17 AM         221096 xunit.runner.utility.netcoreapp10.dll
+-a---            8/3/2020  1:58 PM         157624 xunit.runner.visualstudio.dotnetcore.testadapter.dll
+-a---           10/3/2018  5:30 PM          16384 Xunit.SkippableFact.dll
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentLogic.1.0.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentLogic.1.0.1.2-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentLogic.1.2.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentLogic.1.3.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentLogic.1.4.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentLogic.1.4.0.2-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentLogic.1.4.1.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentLogic.1.5.0.1-gbs-fcts-lpi-calc.nupkg
+THIS IS NOT THE LATEST
+5.0.3.1
+LatePaymentLogic.1.6.0.1-gbs-fcts-lpi-calc.nupkg
+[INFO] Creating & Publishing Docker Image for registry.cigna.com/cognizant/fajob-base:ext-6.00.002.009-20240619172321
