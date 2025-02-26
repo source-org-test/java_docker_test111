@@ -1,3 +1,117 @@
+
+Run Write-Output "[INFO] Fetching NuGet Packages..."
+  Write-Output "[INFO] Fetching NuGet Packages..."
+  
+  # Create error log directory
+  New-Item -ItemType Directory -Path ".\logs" -Force | Out-Null
+  
+  $packages = Get-Content './manifest.json' -Raw | ConvertFrom-Json
+  $keys = $packages.PSObject.Properties.Name
+  $hasErrors = $false
+  $package_version = ""
+  $package_build = ""
+  
+  foreach ($key in $keys) {
+      $name = $packages.$key.name
+      if($name -eq "PACKAGE") { 
+          $package_version = $packages.$key.version
+          $package_build = $packages.$key.build
+          Write-Output "package version $package_version"
+          continue
+      }
+      
+      $version = $packages.$key.version
+      $build = $packages.$key.build
+      
+      Write-Output "[INFO] Processing $key (version: $version, build: $build)"
+      
+      try {
+          # Construct the URL to the directory containing the packages
+          $myUri = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$key/"
+          Write-Output "[INFO] Checking: $myUri"
+          
+          try {
+              # Get the directory listing
+              $response = Invoke-WebRequest -Uri $myUri -UseBasicParsing
+              
+              # Print version for debugging
+              Write-Output "$version"
+              
+              # Parse the links from the response
+              $links = $response.Links | Where-Object { $_.href -ne '../' }
+              
+              # Find the specific package based on version and build
+              $targetVersion = "$version.$build"
+              $latestPackage = $null
+              
+              # Look for packages matching our target version
+              foreach ($link in $links) {
+                  # Extract version from link
+                  $linkVersion = [regex]::Match($link.href, "\d+\.\d+\.\d+\.\d+").Value
+                  
+                  
+                  # Extract the nupkg (which is a zip file)
+                  Add-Type -AssemblyName System.IO.Compression.FileSystem
+                  [System.IO.Compression.ZipFile]::ExtractToDirectory($outputPath, ".\build\nupkg\$name")
+                  
+                  Write-Output "Directory: $(Get-Location)\build\bin"
+                  Get-ChildItem -Path ".\build\bin" -Directory | Format-Table
+                  
+                  # Move DLL files to bin directory
+                  Write-Output "Directory: `n$(Get-Location)\build\bin\$name"
+                  Get-ChildItem -Path ".\build\nupkg\$name" -Filter "*.dll" -Recurse | 
+                      Move-Item -Destination ".\build\bin\$name" -Force
+                      
+                  # List the files in the bin directory
+                  Get-ChildItem -Path ".\build\bin\$name" | Format-Table Mode, LastWriteTime, Length, Name
+                  
+                  # Cleanup
+                  Remove-Item -Path $outputPath -Force
+              } else {
+                  throw "Download failed - output file not created"
+              }
+          } catch {
+  Error:             $errorMessage = "[ERROR] Failed processing $key: $_"
+              Write-Error $errorMessage
+              $errorMessage | Out-File ".\logs\${key}_error.log" -Append
+              $hasErrors = $true
+              continue
+          }
+      }
+      catch {
+  Error:         $errorMessage = "[ERROR] Failed processing $key :`n$_"
+          Write-Error $errorMessage
+          $errorMessage | Out-File ".\logs\${key}_error.log" -Append
+          $hasErrors = $true
+          continue
+      }
+  }
+  
+  if ($hasErrors) {
+      Write-Output "[INFO] Errors occurred during package processing. Check logs directory for details."
+      Get-ChildItem -Path ".\logs" -Filter "*_error.log" | ForEach-Object {
+          Write-Output "`nErrors for $($_.BaseName):"
+          Get-Content $_.FullName | ForEach-Object { Write-Output "  $_" }
+      }
+      exit 1
+  }
+  shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+  env:
+    BASE_IMAGE: fajob
+    BASE_TAG: latest
+    QUAY: registry.cigna.com/cognizant
+    PACKAGE_VERSION: 1.12
+    PACKAGE_BUILD: 1
+  
+ParserError: C:\a\_temp\ddd7cab1-1304-4fd6-8302-36cf8615d645.ps1:123
+Line |
+Error:  123 |              $errorMessage = "[ERROR] Failed processing $key: $_"
+     |                                                         ~~~~~
+     | Variable reference is not valid. ':' was not followed by a valid variable name character. Consider using ${} to
+     | delimit the name.
+Error: Process completed with exit code 1.
+============================================
+
 Run Write-Output "[INFO] Fetching NuGet Packages..."
 [INFO] Fetching NuGet Packages...
 package version 1.12
