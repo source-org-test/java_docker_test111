@@ -12,6 +12,11 @@ on:
           default: '0.1.0'
           required: false
           type: string
+      create_mock_packages:
+          description: 'Create mock packages if download fails'
+          default: false
+          required: false
+          type: boolean
           
 permissions:
   contents: read
@@ -22,6 +27,7 @@ env:
   BASE_IMAGE: 'fajob' 
   BASE_TAG: ${{ github.event.inputs.base_tag || 'latest' }}
   QUAY: 'registry.cigna.com/cognizant'
+  CREATE_MOCK_PACKAGES: ${{ github.event.inputs.create_mock_packages || 'false' }}
 
 jobs:
   build:
@@ -50,6 +56,28 @@ jobs:
         Write-Output "BASE_IMAGE: $env:BASE_IMAGE"
         Write-Output "BASE_TAG: $env:BASE_TAG"
         Write-Output "QUAY: $env:QUAY"
+    
+    - name: Setup JFrog Authentication
+      shell: pwsh
+      run: |
+        # This step sets up authentication for JFrog Artifactory
+        # The actual credentials should be stored as GitHub Secrets
+        
+        Write-Output "Setting up JFrog authentication..."
+        
+        # Check if secrets are available and set them as environment variables
+        if ('${{ secrets.JFROG_USERNAME }}' -ne '' -and '${{ secrets.JFROG_PASSWORD }}' -ne '') {
+            Write-Output "Using JFrog username/password authentication"
+            $env:JFROG_USERNAME = '${{ secrets.JFROG_USERNAME }}'
+            $env:JFROG_PASSWORD = '${{ secrets.JFROG_PASSWORD }}'
+        }
+        elseif ('${{ secrets.JFROG_API_KEY }}' -ne '') {
+            Write-Output "Using JFrog API key authentication"
+            $env:JFROG_API_KEY = '${{ secrets.JFROG_API_KEY }}'
+        }
+        else {
+            Write-Output "No authentication credentials found in secrets. Will attempt anonymous access."
+        }
     
     - name: Prepare Build Directories
       shell: pwsh
@@ -211,28 +239,100 @@ jobs:
               }
               
               # Handle special package naming based on manifest
-              $packageFileName = "$name.$version.$build-$key.nupkg"
+              # Try different package naming formats to handle potential repository structure differences
+              $packageFileNames = @(
+                  # Format 1: Name.Version.Build-Key.nupkg (current format)
+                  "$name.$version.$build-$key.nupkg",
+                  # Format 2: Key.Version.Build.nupkg (alternative format)
+                  "$key.$version.$build.nupkg",
+                  # Format 3: Name.Version.Build.nupkg (simple format)
+                  "$name.$version.$build.nupkg"
+              )
               
-              # Construct and validate package URL
-              try {
-                  $packageUrl = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$key/$packageFileName"
-                  Write-Output "  Downloading: $packageFileName"
-                  Write-Output "  URL: $packageUrl"
-              }
-              catch {
-                  Write-Warning "  Failed to construct URL for package '$name': $_"
-                  continue
+              $downloadSuccess = $false
+              
+              foreach ($packageFileName in $packageFileNames) {
+                  # Construct and validate package URL - try different URL patterns
+                  try {
+                      # Try URL pattern 1: Using key in path
+                      $packageUrl = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$key/$packageFileName"
+                      Write-Output "  Attempting download: $packageFileName"
+                      Write-Output "  URL: $packageUrl"
+                      
+                      $outputPath = "./build/nupkg/temp_$name.zip"
+                      
+                      # Download with authentication
+                      $headers = @{}
+                      if ($env:JFROG_USERNAME -and $env:JFROG_PASSWORD) {
+                          Write-Output "  Using authentication from environment variables"
+                          $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("$($env:JFROG_USERNAME):$($env:JFROG_PASSWORD)")))
+                          $headers.Add("Authorization", "Basic $base64AuthInfo")
+                      }
+                      elseif ($env:JFROG_API_KEY) {
+                          Write-Output "  Using JFrog API key for authentication"
+                          $headers.Add("X-JFrog-Art-Api", $env:JFROG_API_KEY)
+                      }
+                      else {
+                          Write-Output "  No authentication credentials found. Attempting anonymous access."
+                          # Some organizations configure JFrog to require specific headers even for anonymous access
+                          $headers.Add("X-JFrog-Art-Api", "")
+                      }
+                      
+                      # Try to download with appropriate headers
+                      Invoke-WebRequest -Uri $packageUrl -OutFile $outputPath -Headers $headers -UseBasicParsing -ErrorAction Stop
+                      $downloadSuccess = $true
+                      Write-Output "  Download successful!"
+                      break
+                  }
+                  catch {
+                      Write-Warning "  Failed to download package from $packageUrl : $_"
+                      # Continue to next URL pattern
+                  }
+                  
+                  # Try URL pattern 2: Direct to Facets folder
+                  if (-not $downloadSuccess) {
+                      $packageUrl = "https://cigna.jfrog.io/artifactory/cigna-nuget-lower/Cigna/GBS/Cornerstone/Facets/$packageFileName"
+                      Write-Output "  Attempting alternate URL: $packageUrl"
+                      
+                      try {
+                          Invoke-WebRequest -Uri $packageUrl -OutFile $outputPath -Headers $headers -UseBasicParsing -ErrorAction Stop
+                          $downloadSuccess = $true
+                          Write-Output "  Download successful!"
+                          break
+                      }
+                      catch {
+                          Write-Warning "  Failed to download package from alternate URL: $_"
+                      }
+                  }
               }
               
-              $outputPath = "./build/nupkg/temp_$name.zip"
-              
-              # Download without authentication headers
-              try {
-                  Invoke-WebRequest -Uri $packageUrl -OutFile $outputPath -UseBasicParsing -ErrorAction Stop
-              }
-              catch {
-                  Write-Warning "  Failed to download package from $packageUrl : $_"
-                  continue
+              if (-not $downloadSuccess) {
+                  Write-Warning "  All download attempts failed for package: $name. Skipping."
+                  
+                  # Check if we should create a mock package for testing purposes
+                  if ($env:CREATE_MOCK_PACKAGES -eq "true") {
+                      Write-Output "  Creating mock package for testing purposes..."
+                      
+                      # Create directories
+                      $paths = @(
+                        "./build/nupkg/$name",
+                        "./build/bin/$name"
+                      )
+                      foreach ($path in $paths) {
+                        New-Item -ItemType Directory -Path $path -Force | Out-Null
+                      }
+                      
+                      # Create a mock DLL file
+                      $mockDllPath = "./build/bin/$name/$name.dll"
+                      Set-Content -Path $mockDllPath -Value "Mock DLL for $name version $version build $build"
+                      
+                      Write-Output "  Created mock package: $name"
+                      # Don't skip this package since we created a mock
+                  }
+                  else {
+                      # Skip this package
+                      continue
+                  }
               }
               
               if (-not (Test-Path $outputPath)) {
