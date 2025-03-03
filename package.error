@@ -9,7 +9,7 @@ Pushing package with version: 1.0.0
 Pushing LatePaymentInterest_XNET_Core_6.5.0.3.1-gbs-fcts-lpi-calc.nupkg to 'https://nuget.pkg.github.com/zilvertonz'...
   PUT https://nuget.pkg.github.com/zilvertonz/
 warn : Your request could not be authenticated by the GitHub Packages service. Please ensure your access token is valid and has the appropriate scopes configured.
-  Forbidden https://nuget.pkg.github.com/zilvertonz/ 256ms
+  Forbidden https://nuget.pkg.github.com/zilvertonz/ 270ms
 error: Response status code does not indicate success: 403 (Forbidden).
 
 
