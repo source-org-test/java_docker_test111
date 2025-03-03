@@ -1,0 +1,15 @@
+Run if [[ "repository" == "external_url" ]]; then
+  if [[ "repository" == "external_url" ]]; then
+    echo "final_path=" >> $GITHUB_OUTPUT
+  else
+    echo "final_path=nupkg-packages/LatePaymentInterest_XNET_Core_6.5.0.3.1-gbs-fcts-lpi-calc.nupkg" >> $GITHUB_OUTPUT
+  fi
+  shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+  env:
+    DOTNET_ROOT: C:\Program Files\dotnet
+ParserError: C:\a\_temp\087de000-6c22-46ec-8ceb-cdf2334be7b0.ps1:2
+Line |
+   2 |  if [[ "repository" == "external_url" ]]; then
+     |    ~
+     | Missing '(' after 'if' in if statement.
+Error: Process completed with exit code 1.
