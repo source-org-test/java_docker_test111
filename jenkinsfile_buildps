@@ -1,0 +1,92 @@
+
+def nextVersionFromGit(def scope) {
+    def latestVersion = powershell(returnStdout: true, script: "git describe --tags --abbrev=0 --match ${scope}-*.*.*")
+/*    def (major, minor, patch) = latestVersion.tokenize('.').collect { it.toInteger() }
+    def nextVersion
+    switch (scope) {
+        case 'major':
+            nextVersion = "${major + 1}.0.0"
+            break
+        case 'minor':
+            nextVersion = "${major}.${minor + 1}.0"
+            break
+        case 'patch':
+            nextVersion = "${major}.${minor}.${patch + 1}"
+            break
+    }
+*/
+    return latestVersion.trim()
+}
+
+pipeline {
+    environment {
+        QUAY = 'registry.cigna.com/cognizant'
+        BASE_IMAGE = 'fajob'
+    }
+    options {
+        ansiColor('xterm')
+        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '1', numToKeepStr: '5')
+    }
+    agent { label 'windows-build-servers' }
+    stages {
+        stage('Set Build Parameters') {
+            steps {
+                script { 
+                    properties([
+                        parameters([
+                            string(
+                              defaultValue: 'latest',
+                              description: 'Git tag to build',
+                              name: 'VERSION',
+                              trim: true
+                            ),
+                            string(
+                              defaultValue: 'latest',
+                              description: 'Base image tag of facets',
+                              name: 'BASE_TAG',
+                              trim: true
+                            )
+                        ])
+                    ])
+                }
+            }
+        }
+        stage ('Checkout'){
+            parallel {
+                stage ('Checkout - Specific') {
+                    when { expression {env.VERSION != 'latest'}}
+                    steps {
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: "refs/tags/${env.VERSION}"]],
+                            extensions: [[$class: 'CloneOption', shallow: false, depth: 0, reference: '']],
+                            userRemoteConfigs: scm.userRemoteConfigs,
+                        ])
+                    }
+                }
+                stage ('Checkout - Latest') {
+                    when { expression {env.VERSION == 'latest'}}
+                    steps {
+                        script{
+                            env.VERSION = nextVersionFromGit(env.BASE_IMAGE)
+                        }
+                    }
+                }
+            }
+        }
+        stage ('Build & Push Image') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'gbs-quay-id',
+                        passwordVariable: 'deployerCred',
+                        usernameVariable: 'deployerId'),
+                        usernamePassword(credentialsId: 'gbs-artifactory-id',
+                        passwordVariable: 'artifactoryCred',
+                        usernameVariable: 'artifactoryId')]) {
+                        pwsh returnStatus: false, returnStdout: false, script: '.\\build.ps1'
+                    }
+                }
+            }
+        }
+    }
+}
