@@ -1,0 +1,7 @@
+create GHA - code for below code snippet: 
+
+def getReleaseName(String branch, String buildNumber) {
+  def specificBranch = "${branch}".tokenize('/').last();
+  return specificBranch.indexOf('-') > 0
+  ? "${specificBranch.substring(0, specificBranch.indexOf('-') + 0)}-${buildNumber}-${specificBranch.substring(specificBranch.indexOf('-') + 1, specificBranch.size())}"
+  : "${specificBranch}-${buildNumber}";
