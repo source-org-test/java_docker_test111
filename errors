@@ -1,3 +1,24 @@
+PUBLISH SQL TO: C:\a\usmg-RAES-RiskAdjustmentAudit\usmg-RAES-RiskAdjustmentAudit\build\sql     13386372807327
+Inorder to run this script be sure to:  
+     #1 install SqlPackage.  You can use the powershell command:  choco install sqlpackage
+     #2 add msbuild to your path environment
+--------------------------------------------
+MSBuild version 17.13.15+18b3035f6 for .NET Framework
+Build started 3/13/2025 8:53:27 PM.
+
+Project "C:\a\usmg-RAES-RiskAdjustmentAudit\usmg-RAES-RiskAdjustmentAudit\RiskAdjustmentAudit\RiskAdjustmentAudit.Sql\RiskAdjustmentAudit.Sql.sqlproj" on node 1 (default targets).
+C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Microsoft.Common.CurrentVersion.targets(1259,5): error MSB3644: The reference assemblies for .NETFramework,Version=v4.5 were not found. To resolve this, install the Developer Pack (SDK/Targeting Pack) for this framework version or retarget your application. You can download .NET Framework Developer Packs at https://aka.ms/msbuild/developerpacks [C:\a\usmg-RAES-RiskAdjustmentAudit\usmg-RAES-RiskAdjustmentAudit\RiskAdjustmentAudit\RiskAdjustmentAudit.Sql\RiskAdjustmentAudit.Sql.sqlproj]
+_CleanRecordFileWrites:
+  Creating directory "obj\\".
+Done Building Project "C:\a\usmg-RAES-RiskAdjustmentAudit\usmg-RAES-RiskAdjustmentAudit\RiskAdjustmentAudit\RiskAdjustmentAudit.Sql\RiskAdjustmentAudit.Sql.sqlproj" (default targets) -- FAILED.
+
+Build FAILED.
+
+"C:\a\usmg-RAES-RiskAdjustmentAudit\usmg-RAES-RiskAdjustmentAudit\RiskAdjustmentAudit\RiskAdjustmentAudit.Sql\RiskAdjustmentAudit.Sql.sqlproj" (default target) (1) ->
+(GetReferenceAssemblyPaths target) -> 
+  C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\Microsoft.Common.CurrentVersion.targets(1259,5): error MSB3644: The reference assemblies for .NETFramework,Version=v4.5 were not found. To resolve this, install the Developer Pack (SDK/Targeting Pack) for this framework version or retarget your application. You can download .NET Framework Developer Packs at https://aka.ms/msbuild/developerpacks [C:\a\usmg-RAES-RiskAdjustmentAudit\usmg-RAES-RiskAdjustmentAudit\RiskAdjustmentAudit\RiskAdjustmentAudit.Sql\RiskAdjustmentAudit.Sql.sqlproj]
+
+
 
 ==================
 Creating sample dll for testing 
