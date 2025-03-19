@@ -1,0 +1,75 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cigna.Email.Smtp", "Cigna.Email.Smtp\Cigna.Email.Smtp.csproj", "{AEE4DD0C-9BD5-45F6-943D-1A1A066E24B8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4B19C670-0F1A-4388-81CB-D4C2D1FF7AD5}"
+	ProjectSection(SolutionItems) = preProject
+		Cigna.Email.Smtp.sln.DotSettings = Cigna.Email.Smtp.sln.DotSettings
+		Jenkinsfile = Jenkinsfile
+		README.md = README.md
+		VersionInfo.cs = VersionInfo.cs
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cigna.Email.Smtp.HsLogger", "Cigna.Email.Smtp.HsLogger\Cigna.Email.Smtp.HsLogger.csproj", "{461BEC38-97D3-49FA-BEB7-AF20588F7767}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{7739A214-1976-405A-8078-001F38ABB641}"
+	ProjectSection(SolutionItems) = preProject
+		.github\CODEOWNERS = .github\CODEOWNERS
+		.github\CODE_OF_CONDUCT.md = .github\CODE_OF_CONDUCT.md
+		.github\CONTRIBUTING.md = .github\CONTRIBUTING.md
+		.github\pull_request_template.md = .github\pull_request_template.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEMPLATE", "{6235CE6A-1716-4FF7-838A-1830FDF70663}"
+	ProjectSection(SolutionItems) = preProject
+		.github\ISSUE_TEMPLATE\bug_report.md = .github\ISSUE_TEMPLATE\bug_report.md
+		.github\ISSUE_TEMPLATE\feature_request.md = .github\ISSUE_TEMPLATE\feature_request.md
+		.github\ISSUE_TEMPLATE\meeting_notes.md = .github\ISSUE_TEMPLATE\meeting_notes.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A66EEFE3-1DB4-4EDE-89BD-B8AA8A1C614C}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\nuget.config = .nuget\nuget.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cigna.Email.Smtp.Tests", "Cigna.Email.Smtp.Tests\Cigna.Email.Smtp.Tests.csproj", "{A3CCB897-6041-4AEE-B4A3-486BD805833B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cigna.Email.Smtp.Domain", "Cigna.Email.Smtp.Domain\Cigna.Email.Smtp.Domain.csproj", "{3F35E586-DF83-43C0-95CB-3D95ECC773D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AEE4DD0C-9BD5-45F6-943D-1A1A066E24B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEE4DD0C-9BD5-45F6-943D-1A1A066E24B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEE4DD0C-9BD5-45F6-943D-1A1A066E24B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEE4DD0C-9BD5-45F6-943D-1A1A066E24B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{461BEC38-97D3-49FA-BEB7-AF20588F7767}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{461BEC38-97D3-49FA-BEB7-AF20588F7767}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{461BEC38-97D3-49FA-BEB7-AF20588F7767}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{461BEC38-97D3-49FA-BEB7-AF20588F7767}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3CCB897-6041-4AEE-B4A3-486BD805833B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3CCB897-6041-4AEE-B4A3-486BD805833B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3CCB897-6041-4AEE-B4A3-486BD805833B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F35E586-DF83-43C0-95CB-3D95ECC773D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F35E586-DF83-43C0-95CB-3D95ECC773D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F35E586-DF83-43C0-95CB-3D95ECC773D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F35E586-DF83-43C0-95CB-3D95ECC773D8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7739A214-1976-405A-8078-001F38ABB641} = {4B19C670-0F1A-4388-81CB-D4C2D1FF7AD5}
+		{6235CE6A-1716-4FF7-838A-1830FDF70663} = {7739A214-1976-405A-8078-001F38ABB641}
+		{A66EEFE3-1DB4-4EDE-89BD-B8AA8A1C614C} = {4B19C670-0F1A-4388-81CB-D4C2D1FF7AD5}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ACF03D47-E514-411A-9103-6E5ECDB6C241}
+	EndGlobalSection
+EndGlobal
