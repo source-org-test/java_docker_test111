@@ -59,7 +59,7 @@ jobs:
             $name = $package.Name
             $version = $package.Value.version
             $build = $package.Value.build
-            $nugetUrl = "https://nuget.pkg.github.com/zilvertonz/index.json"
+            $nugetUrl = "https://nuget.pkg.newgithub.com/zilvertonz/index.json"
             $headers = @{
             "Authorization" = "Bearer $token"
             "Accept" = "application/vnd.github.v3+json"

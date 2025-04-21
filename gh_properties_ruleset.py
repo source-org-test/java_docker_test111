@@ -8,7 +8,7 @@ import warnings
 import urllib3
 
 # GitHub API base URL
-API_URL = "https://api.github.com"
+API_URL = "https://api.newgithub.com"
 
 # Repository input file delimiter 
 INPUT_FILE_DELIMITER = "::"  
