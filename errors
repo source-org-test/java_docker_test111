@@ -1,27 +1,27 @@
 Run Get-ChildItem C:\a\usmg-daga-smtp-dot-net\usmg-daga-smtp-dot-net\*.nupkg -Recurse | Foreach-Object {
 file: C:\a\usmg-daga-smtp-dot-net\usmg-daga-smtp-dot-net\Cigna.Email.Smtp.2024.2.1.66.nupkg
-Pushing Cigna.Email.Smtp.2024.2.1.66.nupkg to 'https://nuget.pkg.github.com/zilvertonz'...
-  PUT https://nuget.pkg.github.com/zilvertonz/
+Pushing Cigna.Email.Smtp.2024.2.1.66.nupkg to 'https://nuget.pkg.newgithub.com/zilvertonz'...
+  PUT https://nuget.pkg.newgithub.com/zilvertonz/
 warn : Your request could not be authenticated by the GitHub Packages service. Please ensure your access token is valid and has the appropriate scopes configured.
-  Forbidden https://nuget.pkg.github.com/zilvertonz/ 103ms
+  Forbidden https://nuget.pkg.newgithub.com/zilvertonz/ 103ms
 error: Response status code does not indicate success: 403 (Forbidden).
 file: C:\a\usmg-daga-smtp-dot-net\usmg-daga-smtp-dot-net\Cigna.Email.Smtp.Domain.2024.2.1.66.nupkg
-Pushing Cigna.Email.Smtp.Domain.2024.2.1.66.nupkg to 'https://nuget.pkg.github.com/zilvertonz'...
-  PUT https://nuget.pkg.github.com/zilvertonz/
+Pushing Cigna.Email.Smtp.Domain.2024.2.1.66.nupkg to 'https://nuget.pkg.newgithub.com/zilvertonz'...
+  PUT https://nuget.pkg.newgithub.com/zilvertonz/
 warn : Your request could not be authenticated by the GitHub Packages service. Please ensure your access token is valid and has the appropriate scopes configured.
-  Forbidden https://nuget.pkg.github.com/zilvertonz/ 172ms
+  Forbidden https://nuget.pkg.newgithub.com/zilvertonz/ 172ms
 error: Response status code does not indicate success: 403 (Forbidden).
 file: C:\a\usmg-daga-smtp-dot-net\usmg-daga-smtp-dot-net\Cigna.Email.Smtp.HSLogger.2024.2.1.66.nupkg
-Pushing Cigna.Email.Smtp.HSLogger.2024.2.1.66.nupkg to 'https://nuget.pkg.github.com/zilvertonz'...
-  PUT https://nuget.pkg.github.com/zilvertonz/
-  OK https://nuget.pkg.github.com/zilvertonz/ 314ms
+Pushing Cigna.Email.Smtp.HSLogger.2024.2.1.66.nupkg to 'https://nuget.pkg.newgithub.com/zilvertonz'...
+  PUT https://nuget.pkg.newgithub.com/zilvertonz/
+  OK https://nuget.pkg.newgithub.com/zilvertonz/ 314ms
 Your package was pushed.
 
 ==========================================================================
 Run dotnet nuget list source
 Registered Sources:
   1.  github [Enabled]
-      https://nuget.pkg.github.com/zilvertonz/index.json
+      https://nuget.pkg.newgithub.com/zilvertonz/index.json
   2.  nuget.org [Enabled]
       https://api.nuget.org/v3/index.json
   3.  Microsoft Visual Studio Offline Packages [Enabled]

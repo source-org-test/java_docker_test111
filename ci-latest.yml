@@ -19,7 +19,7 @@ env:
   QUAY: 'registry.cigna.com/cognizant'
   REGISTRY: ghcr.io 
   test1: https://ghes.company.com/repo1
-  test2: https://github.com/repo1
+  test2: https://newgithub.com/repo1
   test3: https://ghes.company.com/repo1
   
 jobs:
@@ -67,7 +67,7 @@ jobs:
             $name = $package.Name
             $version = $package.Value.version
             $build = $package.Value.build
-            $nugetUrl = "https://nuget.pkg.github.com/zilvertonz/index.json"
+            $nugetUrl = "https://nuget.pkg.newgithub.com/zilvertonz/index.json"
             $headers = @{
             "Authorization" = "Bearer $token"
             "Accept" = "application/vnd.github.v3+json"
