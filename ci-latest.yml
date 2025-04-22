@@ -19,7 +19,7 @@ env:
   QUAY: 'registry.cigna.com/cognizant'
   REGISTRY: ghcr.io 
   test1: https://ghes.company.com/repo1
-  test2: https://github.com/repo1
+  test2: https://newgithub.com/repo1
   test3: https://ghes.company.com/repo1
   
 jobs:
